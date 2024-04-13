@@ -8,32 +8,32 @@
         mc:Ignorable="d" Background="#343434"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
-        Title="Paint App" Height="810" Width="1440">
+        Title="Paint App" Height="810" Width="1440" Loaded="Window_Loaded">
 
     <DockPanel LastChildFill="True">
         <Border DockPanel.Dock="Top" BorderBrush="#9D9D9D" BorderThickness="0,0,0,1">
             <StackPanel Orientation="Horizontal">
-                <Menu>
-                    <MenuItem Header="_File">
-                        <MenuItem Header="_New" InputGestureText="Ctrl+N" />
-                        <MenuItem Header="_Open..." InputGestureText="Ctrl+O" />
-                        <Separator />
-                        <MenuItem Header="_Save" InputGestureText="Ctrl+S" />
-                        <MenuItem Header="_Save as..." InputGestureText="Ctrl+Shift+X" />
-                        <Separator />
-                        <MenuItem Header="_Quit" InputGestureText="Alt+F4" />
-                    </MenuItem>
+                <Border BorderBrush="#9D9D9D" BorderThickness="0,0,1,0">
+                    <Menu>
+                        <MenuItem Header="_File">
+                            <MenuItem Header="_New" InputGestureText="Ctrl+N" />
+                            <MenuItem Header="_Open..." InputGestureText="Ctrl+O" />
+                            <Separator />
+                            <MenuItem Header="_Save" InputGestureText="Ctrl+S" />
+                            <MenuItem Header="_Save as..." InputGestureText="Ctrl+Shift+X" />
+                            <Separator />
+                            <MenuItem Header="_Quit" InputGestureText="Alt+F4" />
+                        </MenuItem>
 
-                    <MenuItem Header="_Edit">
-                        <MenuItem Header="_Copy" InputGestureText="Ctrl+C" />
-                        <MenuItem Header="_Cut" InputGestureText="Ctrl+X" />
-                        <MenuItem Header="_Paste" InputGestureText="Ctrl+V" />
-                    </MenuItem>
-                </Menu>
+                        <MenuItem Header="_Edit" Margin="0,0,10,0">
+                            <MenuItem Header="_Copy" InputGestureText="Ctrl+C" />
+                            <MenuItem Header="_Cut" InputGestureText="Ctrl+X" />
+                            <MenuItem Header="_Paste" InputGestureText="Ctrl+V" />
+                        </MenuItem>
+                    </Menu>
+                </Border>
 
-                <Border Height="30" Width="1" Background="#9D9D9D" Margin="10,0,10,0" />
-
-                <Button x:Name="BtnUndo" Cursor="Hand" Margin="0,0,10,0"
+                <Button x:Name="BtnUndo" Cursor="Hand" Margin="10,0,10,0"
                         Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                     <mi:MaterialIcon Kind="Undo" Height="24" Width="24" Foreground="White"/>
                 </Button>
@@ -48,7 +48,74 @@
         <Border DockPanel.Dock="Top" BorderBrush="#9D9D9D"
                 BorderThickness="0,0,0,1" Height="100">
             <StackPanel Orientation="Horizontal">
+                <Border BorderBrush="#9D9D9D" BorderThickness="0,0,1,0" Width="120">
+                    <Grid x:Name="FirstBtnGrp" Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
 
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Button Grid.Column="0" Grid.Row="0" x:Name="BtnSelect"
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                            <mi:MaterialIcon Kind="Select" Height="24" Width="24" Foreground="White"/>
+                        </Button>
+
+                        <Button Grid.Column="1" Grid.Row="0" x:Name="BtnMove"
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                            <mi:MaterialIcon Kind="CursorDefault" Height="24" Width="24" Foreground="White"/>
+                        </Button>
+
+                        <Button Grid.Column="0" Grid.Row="1" x:Name="BtnErase"
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                            <mi:MaterialIcon Kind="Eraser" Height="24" Width="24" Foreground="White"/>
+                        </Button>
+
+                        <Button Grid.Column="1" Grid.Row="1" x:Name="BtnText"
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                            <mi:MaterialIcon Kind="LetterABox" Height="24" Width="24" Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Border BorderBrush="#9D9D9D" BorderThickness="0,0,1,0" Width="60">
+                    <Grid x:Name="SecondBtnGrp" Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Button Grid.Row="0" x:Name="BtnRotate"
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                            <mi:MaterialIcon Kind="RotateRight" Height="24" Width="24" Foreground="White"/>
+                        </Button>
+
+                        <Button Grid.Row="1" x:Name="BtnFlip"
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                            <mi:MaterialIcon Kind="FlipHorizontal" Height="24" Width="24" Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Border BorderBrush="#9D9D9D" BorderThickness="0,0,1,0" Width="300">
+                    <Grid x:Name="ShapesBtnGrp">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                    </Grid>
+                </Border>
             </StackPanel>
         </Border>
 
@@ -58,7 +125,15 @@
                 <ColumnDefinition Width="280" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#9D9D9D" />
+            <Border Grid.Column="0" Background="#9D9D9D">
+                <Grid Margin="120,60,120,60">
+                    <Canvas x:Name="DrawingCanvas" Background="White">
+                    </Canvas>
+                    
+                    <Border MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+                            MouseMove="Canvas_MouseMove" Background="Transparent" />
+                </Grid>
+            </Border>
 
             <DockPanel Grid.Column="1" LastChildFill="True">
                 <Border DockPanel.Dock="Bottom" Height="40"
