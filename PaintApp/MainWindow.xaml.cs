@@ -98,7 +98,7 @@ namespace PaintApp
             IShape item = (IShape)(sender as Button)!.Tag;
             _painter = item;
             _painter.SetStrokeColor(Colors.Blue);
-            _painter.SetStrokeWidth(7);
+            _painter.SetStrokeWidth(5);
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
