@@ -1,10 +1,12 @@
 ﻿using Shapes;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 
 namespace PaintApp
@@ -14,14 +16,6 @@ namespace PaintApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-
-            KeyDown += Canvas_KeyDown;
-            KeyUp += Canvas_KeyUp;
-        }
-
         bool _isDrawing = false;
         bool _isShiftPressed = false;
 
@@ -32,6 +26,32 @@ namespace PaintApp
         List<IShape> _painters = new List<IShape>();
         UIElement _lastElement;
         List<IShape> _prototypes = new List<IShape>();
+
+        IShape _painter = null;
+
+        public ObservableCollection<double> StrokeWidths { get; set; }
+        public double StrokeWidth { get; set; }
+
+        public ObservableCollection<BitmapImage> StrokeTypes { get; set; }
+        public double StrokeType { get; set; }
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            DataContext = this;
+
+            KeyDown += Canvas_KeyDown;
+            KeyUp += Canvas_KeyUp;
+
+            StrokeWidths = new ObservableCollection<double> { 1, 2, 4, 8, 10, 12, 16, 20, 24, 32 };
+            StrokeWidth = 2;
+
+            StrokeTypes = new ObservableCollection<BitmapImage> { 
+                new BitmapImage(new Uri("pack://application:,,,/lines/solid.png")),
+                new BitmapImage(new Uri("pack://application:,,,/lines/dash.png")),
+                new BitmapImage(new Uri("pack://application:,,,/lines/dash_dot.png"))
+            };
+        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -71,6 +91,7 @@ namespace PaintApp
                         Height = 36,
                         Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.White), Width = 24, Height = 24 },
                         Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
+                        GroupName = "CtrlBtn",
                         Tag = item,
                     };
 
@@ -83,8 +104,6 @@ namespace PaintApp
                     k++;
                 }
             }
-
-            _painter = _prototypes[0];
         }
 
         private void Canvas_KeyDown(object sender, KeyEventArgs e)
@@ -125,18 +144,26 @@ namespace PaintApp
             _painter = item;
             _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
             _painter.SetFillColor((SolidColorBrush)FillClr.Background);
-            _painter.SetStrokeWidth(5);
+            _painter.SetStrokeWidth(StrokeWidth);
+        }
+
+        private void FirstBtnGrp_Click(object sender, RoutedEventArgs e)
+        {
+            _painter = null;
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _isDrawing = true;
-            _start = e.GetPosition(DrawingCanvas);
+            if (_painter != null)
+            {
+                _isDrawing = true;
+                _start = e.GetPosition(DrawingCanvas);
+            }
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDrawing)
+            if (_painter != null && _isDrawing)
             {
                 _end = e.GetPosition(DrawingCanvas);
                 DrawingCanvas.Children.Clear();
@@ -155,10 +182,23 @@ namespace PaintApp
 
         private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            _isDrawing = false;
-            _painters.Add((IShape)_painter.Clone());
+            if (_painter != null)
+            {
+                _isDrawing = false;
+                _painters.Add((IShape)_painter.Clone());
+            }
         }
 
-        IShape _painter = null;
+        private void StrokeWidthCb_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            double testInput;
+
+            if (_painter != null && StrokeWidthCb.Text.Length > 0 && double.TryParse(StrokeWidthCb.Text, out testInput)) {
+                double width = double.Parse(StrokeWidthCb.Text);
+
+                StrokeWidth = width;
+                _painter.SetStrokeWidth(StrokeWidth);
+            }
+        }
     }
 }

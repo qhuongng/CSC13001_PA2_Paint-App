@@ -9,11 +9,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="lines\dash.png" />
+    <None Remove="lines\dash_dot.png" />
+    <None Remove="lines\solid.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
 	<ProjectReference Include="..\IShape\IShape.csproj" />
 	<ProjectReference Include="..\MyEllipse\MyEllipse.csproj" />
 	<ProjectReference Include="..\MyLine\MyLine.csproj" />
 	<ProjectReference Include="..\MyRect\MyRect.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="lines\dash.png" />
+    <Resource Include="lines\dash_dot.png" />
+    <Resource Include="lines\solid.png" />
   </ItemGroup>
 
 </Project>
