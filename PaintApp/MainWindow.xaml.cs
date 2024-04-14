@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 
 namespace PaintApp
 {
@@ -23,6 +24,7 @@ namespace PaintApp
 
         bool _isDrawing = false;
         bool _isShiftPressed = false;
+
         Point _start;
         Point _end;
 
@@ -43,35 +45,43 @@ namespace PaintApp
 
                 foreach (var type in types)
                 {
-                    if ((type.IsClass)
-                        && (typeof(IShape).IsAssignableFrom(type)))
+                    if (type.IsClass && typeof(IShape).IsAssignableFrom(type))
                     {
                         _prototypes.Add((IShape)Activator.CreateInstance(type)!);
                     }
                 }
             }
 
-            MessageBox.Show("" + _prototypes.Count);
+            int k = 0;
 
-            int i = 0;
-
-            foreach (var item in _prototypes)
+            for (int i = 0; i < ShapesBtnGrp.RowDefinitions.Count; i++)
             {
-                var control = new Button()
+                for (int j = 0; j < ShapesBtnGrp.ColumnDefinitions.Count; j++)
                 {
-                    Width = 80,
-                    Height = 35,
-                    Content = item.Name,
-                    Tag = item,
-                };
+                    if (k == _prototypes.Count)
+                    {
+                        break;
+                    }
 
-                control.Click += Control_Click;
+                    var item = _prototypes[k];
 
-                Grid.SetRow(control, 0);
-                Grid.SetColumn(control, i);
-                ShapesBtnGrp.Children.Add(control);
+                    var control = new RadioButton()
+                    {
+                        Width = 36,
+                        Height = 36,
+                        Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.White), Width = 24, Height = 24 },
+                        Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
+                        Tag = item,
+                    };
 
-                i++;
+                    control.Click += Control_Click;
+
+                    Grid.SetRow(control, i);
+                    Grid.SetColumn(control, j);
+                    ShapesBtnGrp.Children.Add(control);
+
+                    k++;
+                }
             }
 
             _painter = _prototypes[0];
@@ -93,11 +103,28 @@ namespace PaintApp
             }
         }
 
+        private void ColorBtn_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Button b = (Button)sender;
+
+            FillClr.Background = b.Background;
+            _painter.SetFillColor((SolidColorBrush)FillClr.Background);
+        }
+
+        private void ColorBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Button b = (Button)sender;
+
+            StrokeClr.Background = b.Background;
+            _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
+        }
+
         private void Control_Click(object sender, RoutedEventArgs e)
         {
-            IShape item = (IShape)(sender as Button)!.Tag;
+            IShape item = (IShape)(sender as RadioButton)!.Tag;
             _painter = item;
-            _painter.SetStrokeColor(Colors.Blue);
+            _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
+            _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             _painter.SetStrokeWidth(5);
         }
 

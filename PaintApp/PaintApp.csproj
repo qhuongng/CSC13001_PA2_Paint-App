@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Material.Icons.WPF" Version="2.1.9" />
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
 	<ProjectReference Include="..\IShape\IShape.csproj" />
 	<ProjectReference Include="..\MyEllipse\MyEllipse.csproj" />
