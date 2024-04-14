@@ -51,39 +51,52 @@ namespace MyRect
         {
             double width = Math.Abs(_bottomRight.X - _topLeft.X);
             double height = Math.Abs(_bottomRight.Y - _topLeft.Y);
-            double squareEdge = Math.Min(width, height);
+            double circleDiameter = Math.Min(width, height);
 
-            Rectangle r = new Rectangle()
+            Rectangle e = new Rectangle()
             {
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth
             };
 
+            if (_isShiftPressed)
+            {
+                // draw a circle
+                e.Width = circleDiameter;
+                e.Height = circleDiameter;
+            }
+            else
+            {
+                // draw an ellipse
+                e.Width = width;
+                e.Height = height;
+            }
+
             if (_bottomRight.X >= _topLeft.X)
             {
-                Canvas.SetLeft(r, _topLeft.X);
+                e.SetValue(Canvas.LeftProperty, _topLeft.X);
             }
             else
             {
                 if (_isShiftPressed)
-                    Canvas.SetLeft(r, _topLeft.X - squareEdge);
+                    e.SetValue(Canvas.LeftProperty, _topLeft.X - circleDiameter);
                 else
-                    Canvas.SetLeft(r, _topLeft.X - width);
+                    e.SetValue(Canvas.LeftProperty, _topLeft.X - width);
             }
 
             if (_bottomRight.Y >= _topLeft.Y)
             {
-                Canvas.SetTop(r, _topLeft.Y);
+                e.SetValue(Canvas.TopProperty, _topLeft.Y);
             }
             else
             {
                 if (_isShiftPressed)
-                    Canvas.SetTop(r, _topLeft.Y - squareEdge);
+                    e.SetValue(Canvas.TopProperty, _topLeft.Y - circleDiameter);
                 else
-                    Canvas.SetTop(r, _topLeft.Y - height);
+                    e.SetValue(Canvas.TopProperty, _topLeft.Y - height);
             }
 
-            return r;
+            return e;
         }
     }
 }
