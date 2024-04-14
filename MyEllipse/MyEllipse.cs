@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Shapes;
 using System.Windows;
 using System.Windows.Media;
+using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
 namespace MyEllipse
 {
@@ -12,10 +13,12 @@ namespace MyEllipse
         private Point _bottomRight;
 
         private bool _isShiftPressed = false;
+
         private SolidColorBrush _stroke;
+        private SolidColorBrush _fill;
         private double _strokeWidth;
 
-        public string Name => "Ellipse";
+        public IconKind Icon => IconKind.EllipseOutline;
 
         public void AddStart(Point point)
         {
@@ -32,9 +35,14 @@ namespace MyEllipse
             _isShiftPressed = shiftState;
         }
 
-        public void SetStrokeColor(Color color)
+        public void SetStrokeColor(SolidColorBrush color)
         {
-            _stroke = new SolidColorBrush(color);
+            _stroke = color;
+        }
+
+        public void SetFillColor(SolidColorBrush color)
+        {
+            _fill = color;
         }
 
         public void SetStrokeWidth(double width)
@@ -55,6 +63,7 @@ namespace MyEllipse
 
             Ellipse e = new Ellipse()
             {
+                Fill = _fill,
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth
             };

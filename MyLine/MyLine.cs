@@ -2,6 +2,7 @@
 using System.Windows.Shapes;
 using System.Windows;
 using System.Windows.Media;
+using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
 namespace MyLine
 {
@@ -11,10 +12,12 @@ namespace MyLine
         private Point _end;
 
         private bool _isShiftPressed = false;
+
         private SolidColorBrush _stroke;
+        private SolidColorBrush _fill;
         private double _strokeWidth;
 
-        public string Name => "Line";
+        public IconKind Icon => IconKind.VectorLine;
 
         public void AddStart(Point point)
         {
@@ -31,9 +34,14 @@ namespace MyLine
             _isShiftPressed = shiftState;
         }
 
-        public void SetStrokeColor(Color color)
+        public void SetStrokeColor(SolidColorBrush color)
         {
-            _stroke = new SolidColorBrush(color);
+            _stroke = color;
+        }
+
+        public void SetFillColor(SolidColorBrush color)
+        {
+            _fill = color;
         }
 
         public void SetStrokeWidth(double width)

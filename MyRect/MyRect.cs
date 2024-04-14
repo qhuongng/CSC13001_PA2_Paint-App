@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Shapes;
+using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
 namespace MyRect
 {
@@ -12,10 +13,12 @@ namespace MyRect
         private Point _bottomRight;
 
         private bool _isShiftPressed = false;
+
         private SolidColorBrush _stroke;
+        private SolidColorBrush _fill;
         private double _strokeWidth;
 
-        public string Name => "Rectangle";
+        public IconKind Icon => IconKind.RectangleOutline;
 
         public void AddStart(Point point)
         {
@@ -32,9 +35,14 @@ namespace MyRect
             _isShiftPressed = shiftState;
         }
 
-        public void SetStrokeColor(Color color)
+        public void SetStrokeColor(SolidColorBrush color)
         {
-            _stroke = new SolidColorBrush(color);
+            _stroke = color;
+        }
+
+        public void SetFillColor(SolidColorBrush color)
+        {
+            _fill = color;
         }
 
         public void SetStrokeWidth(double width)
@@ -55,6 +63,7 @@ namespace MyRect
 
             Rectangle e = new Rectangle()
             {
+                Fill = _fill,
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth
             };

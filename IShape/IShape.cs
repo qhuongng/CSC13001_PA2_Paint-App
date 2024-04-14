@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Media;
+using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
 namespace Shapes
 {
@@ -9,11 +10,12 @@ namespace Shapes
         void AddEnd(Point point);
 
         void SetShiftState(bool shiftState);
-        void SetStrokeColor(Color color);
+        void SetStrokeColor(SolidColorBrush color);
+        void SetFillColor(SolidColorBrush color);
         void SetStrokeWidth(double width);
 
         UIElement Convert();
 
-        string Name { get; }
+        IconKind Icon { get; }
     }
 }
