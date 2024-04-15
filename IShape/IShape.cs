@@ -13,6 +13,7 @@ namespace Shapes
         void SetStrokeColor(SolidColorBrush color);
         void SetFillColor(SolidColorBrush color);
         void SetStrokeWidth(double width);
+        void SetStrokeDashArray(double[] strokeDashArray);
 
         UIElement Convert();
 

@@ -17,6 +17,8 @@ namespace MyEllipse
         private SolidColorBrush _stroke;
         private SolidColorBrush _fill;
         private double _strokeWidth;
+        private double[]? _strokeDashArray;
+
 
         public IconKind Icon => IconKind.EllipseOutline;
 
@@ -49,7 +51,10 @@ namespace MyEllipse
         {
             _strokeWidth = width;
         }
-
+        public void SetStrokeDashArray(double[] strokeDashArray)
+        {
+            _strokeDashArray = strokeDashArray;
+        }
         public object Clone()
         {
             return MemberwiseClone();
@@ -65,8 +70,12 @@ namespace MyEllipse
             {
                 Fill = _fill,
                 Stroke = _stroke,
-                StrokeThickness = _strokeWidth
+                StrokeThickness = _strokeWidth,
             };
+            if (_strokeDashArray != null)
+            {
+                e.StrokeDashArray = new DoubleCollection(_strokeDashArray);
+            }
 
             if (_isShiftPressed)
             {

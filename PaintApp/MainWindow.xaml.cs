@@ -28,12 +28,15 @@ namespace PaintApp
         List<IShape> _prototypes = new List<IShape>();
 
         IShape _painter = null;
+        BitmapImage solid = new BitmapImage(new Uri("pack://application:,,,/lines/solid.png"));
+        BitmapImage dash = new BitmapImage(new Uri("pack://application:,,,/lines/dash.png"));
+        BitmapImage dash_dot = new BitmapImage(new Uri("pack://application:,,,/lines/dash_dot.png"));
 
         public ObservableCollection<double> StrokeWidths { get; set; }
         public double StrokeWidth { get; set; }
 
         public ObservableCollection<BitmapImage> StrokeTypes { get; set; }
-        public double StrokeType { get; set; }
+        public BitmapImage StrokeType { get; set; }
 
         public MainWindow()
         {
@@ -45,12 +48,10 @@ namespace PaintApp
 
             StrokeWidths = new ObservableCollection<double> { 1, 2, 4, 8, 10, 12, 16, 20, 24, 32 };
             StrokeWidth = 2;
-
-            StrokeTypes = new ObservableCollection<BitmapImage> { 
-                new BitmapImage(new Uri("pack://application:,,,/lines/solid.png")),
-                new BitmapImage(new Uri("pack://application:,,,/lines/dash.png")),
-                new BitmapImage(new Uri("pack://application:,,,/lines/dash_dot.png"))
-            };
+            
+            
+            StrokeTypes = new ObservableCollection<BitmapImage> {solid,dash,dash_dot};
+            StrokeType = StrokeTypes[0];
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -127,7 +128,10 @@ namespace PaintApp
             Button b = (Button)sender;
 
             FillClr.Background = b.Background;
-            _painter.SetFillColor((SolidColorBrush)FillClr.Background);
+            if(_painter != null)
+            {
+                _painter.SetFillColor((SolidColorBrush)FillClr.Background);
+            }
         }
 
         private void ColorBtn_Click(object sender, RoutedEventArgs e)
@@ -135,7 +139,10 @@ namespace PaintApp
             Button b = (Button)sender;
 
             StrokeClr.Background = b.Background;
-            _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
+            if(_painter != null)
+            {
+                _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
+            }
         }
 
         private void Control_Click(object sender, RoutedEventArgs e)
@@ -145,6 +152,7 @@ namespace PaintApp
             _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
             _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             _painter.SetStrokeWidth(StrokeWidth);
+            _painter.SetStrokeDashArray(transferStrokeDashArray(StrokeType));
         }
 
         private void FirstBtnGrp_Click(object sender, RoutedEventArgs e)
@@ -198,6 +206,37 @@ namespace PaintApp
 
                 StrokeWidth = width;
                 _painter.SetStrokeWidth(StrokeWidth);
+            }
+        }
+
+        private void ComboBoxStrokeType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox comboBox = (ComboBox)sender;
+            if (comboBox.SelectedItem != null)
+            {
+                StrokeType = (BitmapImage)comboBox.SelectedItem;
+                if (_painter != null)
+                {
+                    _painter.SetStrokeDashArray(transferStrokeDashArray(StrokeType));
+                }
+            }
+        }
+
+        private Double[] transferStrokeDashArray(BitmapImage image)
+        {
+            Uri uri = image.UriSource;
+            string fileName = System.IO.Path.GetFileName(uri.LocalPath);
+            if (fileName.Equals("solid.png"))
+            {
+                return null;
+            }
+            else if (fileName.Equals("dash.png"))
+            {
+                return new Double[] { 5, 2 };
+            }
+            else
+            {
+                return new double[] { 5, 2, 1, 2 };
             }
         }
     }

@@ -16,6 +16,7 @@ namespace MyLine
         private SolidColorBrush _stroke;
         private SolidColorBrush _fill;
         private double _strokeWidth;
+        private double[]? _strokeDashArray;
 
         public IconKind Icon => IconKind.VectorLine;
 
@@ -48,6 +49,10 @@ namespace MyLine
         {
             _strokeWidth = width;
         }
+        public void SetStrokeDashArray(double[] strokeDashArray)
+        {
+            _strokeDashArray = strokeDashArray;
+        }
 
         public object Clone()
         {
@@ -56,15 +61,20 @@ namespace MyLine
 
         public UIElement Convert()
         {
-            return new Line()
+            Line e = new Line()
             {
                 X1 = _start.X,
                 Y1 = _start.Y,
                 X2 = _end.X,
                 Y2 = _end.Y,
                 StrokeThickness = _strokeWidth,
-                Stroke = _stroke
+                Stroke = _stroke,
             };
+            if (_strokeDashArray != null)
+            {
+                e.StrokeDashArray = new DoubleCollection(_strokeDashArray);
+            }
+            return e;
         }
     }
 
