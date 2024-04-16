@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStar", "MyStar\MyStar.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyHeart", "MyHeart\MyHeart.csproj", "{79B45F74-F9BC-461C-AAFE-69164DA4A86D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyArrow", "MyArrow\MyArrow.csproj", "{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

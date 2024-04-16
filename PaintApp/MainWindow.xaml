@@ -142,7 +142,7 @@
                         <ComboBox x:Name="StrokeWidthCb" Grid.Row="0" IsTextSearchEnabled="True" IsEditable="True" HorizontalAlignment="Stretch" TextBoxBase.TextChanged="StrokeWidthCb_TextChanged"
                                   ItemsSource="{Binding StrokeWidths}" Text="{Binding StrokeWidth, Mode=TwoWay}" Background="#555555" Foreground="White" Margin="0,0,0,8" VerticalAlignment="Stretch" />
 
-                        <ComboBox Grid.Row="1" HorizontalAlignment="Stretch" SelectionChanged="ComboBoxStrokeType_SelectionChanged"
+                        <ComboBox x:Name="StrokeTypeCb" Grid.Row="1" HorizontalAlignment="Stretch" SelectionChanged="StrokeTypeCb_SelectionChanged"
                                   ItemsSource="{Binding StrokeTypes}" Background="#343434" Foreground="White"
                                   SelectedItem="{Binding StrokeType, Mode=TwoWay}">
                             <ComboBox.ItemTemplate>
@@ -256,10 +256,9 @@
 
             <Border Grid.Column="0" Background="#9D9D9D">
                 <Grid Margin="120,60,120,60">
-                    <Canvas x:Name="DrawingCanvas" Background="White">
-                    </Canvas>
-                    
-                    <Border MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+                    <local:DragCanvas x:Name="DrawingCanvas" Background="White" />
+
+                    <Border x:Name="CanvasHelper" MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
                             MouseMove="Canvas_MouseMove" Background="Transparent" />
                 </Grid>
             </Border>

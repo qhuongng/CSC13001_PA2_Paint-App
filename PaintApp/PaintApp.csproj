@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
 	<ProjectReference Include="..\IShape\IShape.csproj" />
+	<ProjectReference Include="..\MyArrow\MyArrow.csproj" />
 	<ProjectReference Include="..\MyEllipse\MyEllipse.csproj" />
 	<ProjectReference Include="..\MyHeart\MyHeart.csproj" />
 	<ProjectReference Include="..\MyLine\MyLine.csproj" />
