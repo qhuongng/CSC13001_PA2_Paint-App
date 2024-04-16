@@ -49,9 +49,21 @@ namespace MyLine
         {
             _strokeWidth = width;
         }
+
         public void SetStrokeDashArray(double[] strokeDashArray)
         {
             _strokeDashArray = strokeDashArray;
+        }
+
+        public void SetPosition(double top, double left)
+        {
+            double xDelta = _end.X - _start.X;
+            double yDelta = _end.Y - _start.Y;
+
+            _start.X = left;
+            _start.Y = top;
+            _end.X = left + xDelta;
+            _end.Y = top + yDelta;
         }
 
         public object Clone()

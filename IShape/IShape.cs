@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
@@ -14,6 +15,7 @@ namespace Shapes
         void SetFillColor(SolidColorBrush color);
         void SetStrokeWidth(double width);
         void SetStrokeDashArray(double[] strokeDashArray);
+        void SetPosition(double top, double left);
 
         UIElement Convert();
 

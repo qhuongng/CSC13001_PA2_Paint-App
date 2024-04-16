@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Shapes;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -18,7 +19,14 @@ namespace PaintApp
         private bool _isDragging;
         private Rectangle _selectionBounds;
 
-        public DragCanvas() { }
+        private IShape _toModify;
+
+        public List<IShape> Objects { get; set; }
+
+        public DragCanvas()
+        {
+            Objects = new List<IShape>();
+        }
 
         public void BringToFront(UIElement element)
         {
@@ -138,6 +146,14 @@ namespace PaintApp
         {
             base.OnPreviewMouseUp(e);
             BoundSelectedElement();
+
+            if (_toModify != null)
+            {
+                MessageBox.Show("yay");
+                _toModify.SetPosition(GetTop(SelectedElement), GetLeft(SelectedElement));
+            }
+
+            _toModify = null;
             SelectedElement = null;
         }
 
@@ -158,7 +174,7 @@ namespace PaintApp
                 Height = elemSize.Height + 2,
                 Stroke = Brushes.Red,
                 StrokeThickness = 1,
-                StrokeDashArray = new DoubleCollection(new double[] { 4, 2 })
+                StrokeDashArray = new DoubleCollection([4, 2])
             };
 
             // Set the position of the selection bounds based on the translated coordinates
@@ -192,7 +208,7 @@ namespace PaintApp
             // The 'Top' value is honored if both Canvas.Top and 
             // Canvas.Bottom are set on the same element.  If one 
             // of those attached properties is not set on an element, 
-            // the default value is Double.NaN.
+            // the default value is Double.NaN
             useSide1 = true;
             double result;
 
@@ -201,7 +217,7 @@ namespace PaintApp
                 if (double.IsNaN(side2))
                 {
                     // both sides have no value, so set the
-                    // first side to a value of zero.
+                    // first side to a value of zero
                     result = 0;
                 }
                 else
@@ -223,7 +239,7 @@ namespace PaintApp
             if (element == null)
                 throw new ArgumentNullException("element");
 
-            if (!base.Children.Contains(element))
+            if (!Children.Contains(element))
                 throw new ArgumentException("Must be a child element of the Canvas.", "element");
 
             // determine the Z-Index
@@ -231,7 +247,7 @@ namespace PaintApp
 
             if (bringToFront)
             {
-                foreach (UIElement elem in base.Children)
+                foreach (UIElement elem in Children)
                     if (elem.Visibility != Visibility.Collapsed)
                         ++elementNewZIndex;
             }
@@ -245,7 +261,7 @@ namespace PaintApp
             int elementCurrentZIndex = GetZIndex(element);
 
             // update the Z-Index of every UIElement in the Canvas
-            foreach (UIElement childElement in base.Children)
+            foreach (UIElement childElement in Children)
             {
                 if (childElement == element)
                     SetZIndex(element, elementNewZIndex);
