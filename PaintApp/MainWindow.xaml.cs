@@ -209,12 +209,13 @@ namespace PaintApp
             }
         }
 
-        private void ComboBoxStrokeType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void StrokeTypeCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBox comboBox = (ComboBox)sender;
             if (comboBox.SelectedItem != null)
             {
                 StrokeType = (BitmapImage)comboBox.SelectedItem;
+
                 if (_painter != null)
                 {
                     _painter.SetStrokeDashArray(transferStrokeDashArray(StrokeType));
@@ -222,17 +223,18 @@ namespace PaintApp
             }
         }
 
-        private Double[] transferStrokeDashArray(BitmapImage image)
+        private double[] transferStrokeDashArray(BitmapImage image)
         {
             Uri uri = image.UriSource;
-            string fileName = System.IO.Path.GetFileName(uri.LocalPath);
+            string fileName = Path.GetFileName(uri.LocalPath);
+
             if (fileName.Equals("solid.png"))
             {
                 return null;
             }
             else if (fileName.Equals("dash.png"))
             {
-                return new Double[] { 5, 2 };
+                return new double[] { 5, 2 };
             }
             else
             {

@@ -7,11 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaintApp", "PaintApp\PaintA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IShape", "IShape\IShape.csproj", "{14613D91-47B1-46C3-9222-74602DFD4597}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyEllipse", "MyEllipse\MyEllipse.csproj", "{D50F7F23-7869-416B-9E53-CC405A676255}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyEllipse", "MyEllipse\MyEllipse.csproj", "{D50F7F23-7869-416B-9E53-CC405A676255}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyLine", "MyLine\MyLine.csproj", "{89135FF2-9871-4357-9748-F74E1BEDEF3F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRect", "MyRect\MyRect.csproj", "{29816E3C-5892-4C47-9F70-FB9669F5A825}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyArrow", "MyArrow\MyArrow.csproj", "{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{29816E3C-5892-4C47-9F70-FB9669F5A825}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29816E3C-5892-4C47-9F70-FB9669F5A825}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29816E3C-5892-4C47-9F70-FB9669F5A825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -61,7 +61,7 @@ namespace MyLine
 
         public UIElement Convert()
         {
-            Line e = new Line()
+            Line l = new Line()
             {
                 X1 = _start.X,
                 Y1 = _start.Y,
@@ -70,11 +70,13 @@ namespace MyLine
                 StrokeThickness = _strokeWidth,
                 Stroke = _stroke,
             };
+
             if (_strokeDashArray != null)
             {
-                e.StrokeDashArray = new DoubleCollection(_strokeDashArray);
+                l.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
-            return e;
+
+            return l;
         }
     }
 
