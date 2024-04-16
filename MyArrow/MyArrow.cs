@@ -70,7 +70,7 @@ namespace MyArrow
             vx /= dist;
             vy /= dist;
 
-            double wingLength = Math.Max(7, _strokeWidth * 3);
+            double wingLength = Math.Max(7, _strokeWidth * 2);
 
             double ax = wingLength * (-vy - vx);
             double ay = wingLength * (vx - vy);
