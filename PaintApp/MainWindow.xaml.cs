@@ -17,17 +17,16 @@ namespace PaintApp
     public partial class MainWindow : Window
     {
         bool _isDrawing = false;
-        bool _isShiftPressed = false;
 
         Point _start;
         Point _end;
 
         List<UIElement> _list = new List<UIElement>();
-        List<IShape> _painters = new List<IShape>();
-        UIElement _lastElement;
+        List<IShape> _drawnObjects = new List<IShape>();
         List<IShape> _prototypes = new List<IShape>();
 
         IShape _painter = null;
+
         BitmapImage solid = new BitmapImage(new Uri("pack://application:,,,/lines/solid.png"));
         BitmapImage dash = new BitmapImage(new Uri("pack://application:,,,/lines/dash.png"));
         BitmapImage dash_dot = new BitmapImage(new Uri("pack://application:,,,/lines/dash_dot.png"));
@@ -128,7 +127,8 @@ namespace PaintApp
             Button b = (Button)sender;
 
             FillClr.Background = b.Background;
-            if(_painter != null)
+
+            if (_painter != null)
             {
                 _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             }
@@ -139,7 +139,8 @@ namespace PaintApp
             Button b = (Button)sender;
 
             StrokeClr.Background = b.Background;
-            if(_painter != null)
+
+            if (_painter != null)
             {
                 _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
             }
@@ -148,16 +149,21 @@ namespace PaintApp
         private void Control_Click(object sender, RoutedEventArgs e)
         {
             IShape item = (IShape)(sender as RadioButton)!.Tag;
+
             _painter = item;
             _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
             _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             _painter.SetStrokeWidth(StrokeWidth);
             _painter.SetStrokeDashArray(transferStrokeDashArray(StrokeType));
+
+            CanvasHelper.Visibility = Visibility.Visible;
         }
 
         private void FirstBtnGrp_Click(object sender, RoutedEventArgs e)
         {
             _painter = null;
+
+            CanvasHelper.Visibility = Visibility.Collapsed;
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -176,7 +182,7 @@ namespace PaintApp
                 _end = e.GetPosition(DrawingCanvas);
                 DrawingCanvas.Children.Clear();
 
-                foreach (var item in _painters)
+                foreach (var item in _drawnObjects)
                 {
                     DrawingCanvas.Children.Add(item.Convert());
                 }
@@ -193,7 +199,7 @@ namespace PaintApp
             if (_painter != null)
             {
                 _isDrawing = false;
-                _painters.Add((IShape)_painter.Clone());
+                _drawnObjects.Add((IShape)_painter.Clone());
             }
         }
 
