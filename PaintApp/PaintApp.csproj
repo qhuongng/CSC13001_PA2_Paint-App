@@ -19,8 +19,10 @@
 	<ProjectReference Include="..\IShape\IShape.csproj" />
 	<ProjectReference Include="..\MyArrow\MyArrow.csproj" />
 	<ProjectReference Include="..\MyEllipse\MyEllipse.csproj" />
+	<ProjectReference Include="..\MyHeart\MyHeart.csproj" />
 	<ProjectReference Include="..\MyLine\MyLine.csproj" />
 	<ProjectReference Include="..\MyRect\MyRect.csproj" />
+	<ProjectReference Include="..\MyStar\MyStar.csproj" />
   </ItemGroup>
 
   <ItemGroup>
