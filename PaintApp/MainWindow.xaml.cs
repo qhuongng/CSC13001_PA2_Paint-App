@@ -46,9 +46,9 @@ namespace PaintApp
 
             StrokeWidths = new ObservableCollection<double> { 1, 2, 4, 8, 10, 12, 16, 20, 24, 32 };
             StrokeWidth = 2;
-            
-            
-            StrokeTypes = new ObservableCollection<BitmapImage> {solid,dash,dash_dot};
+
+
+            StrokeTypes = new ObservableCollection<BitmapImage> { solid, dash, dash_dot };
             StrokeType = StrokeTypes[0];
         }
 
@@ -206,7 +206,8 @@ namespace PaintApp
         {
             double testInput;
 
-            if (_painter != null && StrokeWidthCb.Text.Length > 0 && double.TryParse(StrokeWidthCb.Text, out testInput)) {
+            if (_painter != null && StrokeWidthCb.Text.Length > 0 && double.TryParse(StrokeWidthCb.Text, out testInput))
+            {
                 double width = double.Parse(StrokeWidthCb.Text);
 
                 StrokeWidth = width;

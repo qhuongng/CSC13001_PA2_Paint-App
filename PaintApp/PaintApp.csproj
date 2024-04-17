@@ -22,7 +22,9 @@
 	<ProjectReference Include="..\MyHeart\MyHeart.csproj" />
 	<ProjectReference Include="..\MyLine\MyLine.csproj" />
 	<ProjectReference Include="..\MyRect\MyRect.csproj" />
+	<ProjectReference Include="..\MyRoundedRect\MyRoundedRect.csproj" />
 	<ProjectReference Include="..\MyStar\MyStar.csproj" />
+	<ProjectReference Include="..\MyTriangle\MyTriangle.csproj" />
   </ItemGroup>
 
   <ItemGroup>

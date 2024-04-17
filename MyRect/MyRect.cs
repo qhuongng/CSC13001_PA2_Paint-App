@@ -1,7 +1,7 @@
 ﻿using Shapes;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows;
 using System.Windows.Shapes;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
@@ -19,7 +19,7 @@ namespace MyRect
         private double _strokeWidth;
         private double[]? _strokeDashArray;
 
-        public IconKind Icon => IconKind.RectangleOutline;
+        public IconKind Icon => IconKind.SquareOutline;
 
         public void AddStart(Point point)
         {

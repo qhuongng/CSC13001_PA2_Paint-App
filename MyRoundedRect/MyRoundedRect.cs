@@ -5,9 +5,9 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
-namespace MyEllipse
+namespace MyRoundedRect
 {
-    public class MyEllipse : IShape
+    public class MyRoundedRect : IShape
     {
         private Point _topLeft;
         private Point _bottomRight;
@@ -19,8 +19,7 @@ namespace MyEllipse
         private double _strokeWidth;
         private double[]? _strokeDashArray;
 
-
-        public IconKind Icon => IconKind.EllipseOutline;
+        public IconKind Icon => IconKind.SquareRoundedOutline;
 
         public void AddStart(Point point)
         {
@@ -78,11 +77,13 @@ namespace MyEllipse
             double height = Math.Abs(_bottomRight.Y - _topLeft.Y);
             double circleDiameter = Math.Min(width, height);
 
-            Ellipse e = new Ellipse()
+            Rectangle e = new Rectangle()
             {
                 Fill = _fill,
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth,
+                RadiusX = 12,
+                RadiusY = 12
             };
             if (_strokeDashArray != null)
             {

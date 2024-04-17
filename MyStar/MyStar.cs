@@ -1,5 +1,4 @@
-﻿using MahApps.Metro.IconPacks;
-using Shapes;
+﻿using Shapes;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -94,7 +93,7 @@ namespace MyStar
             }
 
             // calculate center point
-            Point center = new Point(_topLeft.X + width / 2, _topLeft.Y + height / 2);
+            Point center = new Point((_topLeft.X + _bottomRight.X) / 2, (_topLeft.Y + _bottomRight.Y) / 2);
 
             // calculate vertices of the star
             List<Point> starVertices = new List<Point>();
@@ -118,10 +117,10 @@ namespace MyStar
             }
 
             // find the minimum and maximum X and Y coordinates of the star vertices
-            double minX = starVertices.Min(p => p.X);
-            double maxX = starVertices.Max(p => p.X);
-            double minY = starVertices.Min(p => p.Y);
-            double maxY = starVertices.Max(p => p.Y);
+            double minX = starVertices.Min(p => p.X) - _strokeWidth * 1.5;
+            double maxX = starVertices.Max(p => p.X) + _strokeWidth * 1.5;
+            double minY = starVertices.Min(p => p.Y) - _strokeWidth;
+            double maxY = starVertices.Max(p => p.Y) + _strokeWidth;
 
             // create a PathGeometry to hold the star shape
             PathGeometry starGeometry = new PathGeometry();

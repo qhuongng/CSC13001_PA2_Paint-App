@@ -40,7 +40,7 @@ namespace MyArrow
             _stroke = color;
         }
 
-        public void SetFillColor(SolidColorBrush color) {}
+        public void SetFillColor(SolidColorBrush color) { }
 
         public void SetStrokeWidth(double width)
         {
