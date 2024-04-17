@@ -51,10 +51,23 @@ namespace MyHeart
         {
             _strokeWidth = width;
         }
+
         public void SetStrokeDashArray(double[] strokeDashArray)
         {
             _strokeDashArray = strokeDashArray;
         }
+
+        public void SetPosition(double top, double left)
+        {
+            double xDelta = _bottomRight.X - _topLeft.X;
+            double yDelta = _bottomRight.Y - _topLeft.Y;
+
+            _topLeft.X = left;
+            _topLeft.Y = top;
+            _bottomRight.X = left + xDelta;
+            _bottomRight.Y = top + yDelta;
+        }
+
         public object Clone()
         {
             return MemberwiseClone();
@@ -84,7 +97,7 @@ namespace MyHeart
             heartFigure.StartPoint = new Point(center.X, center.Y + height / 4); // Starting point at the bottom center
 
             heartFigure.Segments.Add(new LineSegment(new Point(center.X - width/2, center.Y - height / 4), true)); // Draw the left line segment
-                                                                                                           // Draw the left arc of the heart
+                                                                                                                   // Draw the left arc of the heart
             ArcSegment leftArc = new ArcSegment(
                 new Point(center.X, center.Y - height / 2),
                 new Size(width / 4, height / 4),

@@ -1,6 +1,7 @@
 ﻿using MahApps.Metro.IconPacks;
 using Shapes;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
@@ -29,11 +30,6 @@ namespace MyStar
             _topLeft = point;
         }
 
-        public object Clone()
-        {
-            return MemberwiseClone();
-        }
-
         public void SetFillColor(SolidColorBrush color)
         {
             _fill = color;
@@ -49,85 +45,100 @@ namespace MyStar
             _stroke = color;
         }
 
+        public void SetStrokeWidth(double width)
+        {
+            _strokeWidth = width;
+        }
+
         public void SetStrokeDashArray(double[] strokeDashArray)
         {
             _strokeDashArray = strokeDashArray;
         }
 
-        public void SetStrokeWidth(double width)
+        public void SetPosition(double top, double left)
         {
-            _strokeWidth = width;
+            double xDelta = _bottomRight.X - _topLeft.X;
+            double yDelta = _bottomRight.Y - _topLeft.Y;
+
+            _topLeft.X = left;
+            _topLeft.Y = top;
+            _bottomRight.X = left + xDelta;
+            _bottomRight.Y = top + yDelta;
         }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
+
         public UIElement Convert()
         {
-            // Calculate radius based on diagonal distance
+            // calculate radius based on diagonal distance
             double width = Math.Abs(_bottomRight.X - _topLeft.X);
             double height = Math.Abs(_bottomRight.Y - _topLeft.Y);
             double circleDiameter = Math.Min(width, height);
 
-            // Recalculate radiusX and radiusY based on radius
+            // recalculate radiusX and radiusY based on radius
             double radiusX;
             double radiusY;
 
-            if(_isShiftPressed)
+            if (_isShiftPressed)
             {
                 radiusX = circleDiameter / 2;
                 radiusY = circleDiameter / 2;
-            } else
+            }
+            else
             {
                 radiusX = width / 2;
                 radiusY = height / 2;
             }
 
+            // calculate center point
+            Point center = new Point(_topLeft.X + width / 2, _topLeft.Y + height / 2);
 
-            // Calculate center point
-            Point center;
-            if(_topLeft.X >= _bottomRight.X)
-            {
-                if(_topLeft.Y >= _bottomRight.Y)
-                {
-                    center = new Point(_topLeft.X - radiusX, _topLeft.Y - radiusY);
-                }
-                else
-                {
-                    center = new Point(_topLeft.X - radiusX, _topLeft.Y + radiusY);
-                }
-            } else
-            {
-                if(_topLeft.Y >= _bottomRight.Y)
-                {
-                    center = new Point(_topLeft.X + radiusX, _topLeft.Y - radiusY);
-                } else
-                {
-                    center = new Point(_topLeft.X + radiusX, _topLeft.Y + radiusY);
-                }
-            }
-            
+            // calculate vertices of the star
+            List<Point> starVertices = new List<Point>();
 
-            // Vẽ hình ngôi sao
-            PathGeometry starGeometry = new PathGeometry();
-            PathFigure starFigure = new PathFigure();
-            starFigure.StartPoint = new Point(center.X, center.Y - radiusY); // Start from the top point
             double angle = -Math.PI / 2;
             double deltaAngle = Math.PI / 5;
+
             for (int i = 0; i < 5; i++)
             {
                 double x = center.X + radiusX * Math.Cos(angle);
                 double y = center.Y + radiusY * Math.Sin(angle);
-                starFigure.Segments.Add(new LineSegment(new Point(x, y), true));
+
+                starVertices.Add(new Point(x, y));
                 angle += deltaAngle;
 
                 x = center.X + (radiusX / 2) * Math.Cos(angle);
                 y = center.Y + (radiusY / 2) * Math.Sin(angle);
 
-                starFigure.Segments.Add(new LineSegment(new Point(x, y), true));
+                starVertices.Add(new Point(x, y));
                 angle += deltaAngle;
             }
-            // Close the star by connecting the last point to the start point
-            starFigure.Segments.Add(new LineSegment(starFigure.StartPoint, true));
+
+            // find the minimum and maximum X and Y coordinates of the star vertices
+            double minX = starVertices.Min(p => p.X);
+            double maxX = starVertices.Max(p => p.X);
+            double minY = starVertices.Min(p => p.Y);
+            double maxY = starVertices.Max(p => p.Y);
+
+            // create a PathGeometry to hold the star shape
+            PathGeometry starGeometry = new PathGeometry();
+            PathFigure starFigure = new PathFigure();
+            starFigure.StartPoint = new Point(starVertices[0].X - minX, starVertices[0].Y - minY);
+
+            // add line segments connecting the star vertices
+            for (int i = 1; i < starVertices.Count; i++)
+            {
+                starFigure.Segments.Add(new LineSegment(new Point(starVertices[i].X - minX, starVertices[i].Y - minY), true));
+            }
+
+            // close the star by connecting the last point to the start point
+            starFigure.IsClosed = true;
             starGeometry.Figures.Add(starFigure);
 
-            // Tạo đối tượng Path để vẽ hình ngôi sao
+            // add the starPath to the containerGrid
             Path starPath = new Path();
             starPath.Fill = _fill;
             starPath.Stroke = _stroke;
@@ -135,7 +146,21 @@ namespace MyStar
             starPath.StrokeDashArray = new DoubleCollection(_strokeDashArray ?? new double[] { });
             starPath.Data = starGeometry;
 
-            return starPath;
+            // calculate the bounding box dimensions
+            double boundingWidth = maxX - minX;
+            double boundingHeight = maxY - minY;
+
+            // create a container Grid to hold the star
+            Grid containerGrid = new Grid();
+            containerGrid.Width = boundingWidth;
+            containerGrid.Height = boundingHeight;
+            containerGrid.Children.Add(starPath);
+
+            // Set the position of the containerGrid
+            Canvas.SetLeft(containerGrid, minX);
+            Canvas.SetTop(containerGrid, minY);
+
+            return containerGrid;
         }
 
     }

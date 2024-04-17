@@ -55,6 +55,17 @@ namespace MyRect
             _strokeDashArray = strokeDashArray;
         }
 
+        public void SetPosition(double top, double left)
+        {
+            double xDelta = _bottomRight.X - _topLeft.X;
+            double yDelta = _bottomRight.Y - _topLeft.Y;
+
+            _topLeft.X = left;
+            _topLeft.Y = top;
+            _bottomRight.X = left + xDelta;
+            _bottomRight.Y = top + yDelta;
+        }
+
         public object Clone()
         {
             return MemberwiseClone();

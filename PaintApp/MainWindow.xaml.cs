@@ -22,7 +22,6 @@ namespace PaintApp
         Point _end;
 
         List<UIElement> _list = new List<UIElement>();
-        List<IShape> _drawnObjects = new List<IShape>();
         List<IShape> _prototypes = new List<IShape>();
 
         IShape _painter = null;
@@ -182,7 +181,7 @@ namespace PaintApp
                 _end = e.GetPosition(DrawingCanvas);
                 DrawingCanvas.Children.Clear();
 
-                foreach (var item in _drawnObjects)
+                foreach (var item in DrawingCanvas.Objects)
                 {
                     DrawingCanvas.Children.Add(item.Convert());
                 }
@@ -199,7 +198,7 @@ namespace PaintApp
             if (_painter != null)
             {
                 _isDrawing = false;
-                _drawnObjects.Add((IShape)_painter.Clone());
+                DrawingCanvas.Objects.Add((IShape)_painter.Clone());
             }
         }
 

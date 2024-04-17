@@ -40,11 +40,7 @@ namespace MyArrow
             _stroke = color;
         }
 
-        public void SetFillColor(SolidColorBrush color)
-        {
-            // Arrows typically don't have a fill color
-            // You can ignore this method or throw an exception if it's called
-        }
+        public void SetFillColor(SolidColorBrush color) {}
 
         public void SetStrokeWidth(double width)
         {
@@ -54,6 +50,17 @@ namespace MyArrow
         public void SetStrokeDashArray(double[] strokeDashArray)
         {
             _strokeDashArray = strokeDashArray;
+        }
+
+        public void SetPosition(double top, double left)
+        {
+            double xDelta = _end.X - _start.X;
+            double yDelta = _end.Y - _start.Y;
+
+            _start.X = left;
+            _start.Y = top;
+            _end.X = left + xDelta;
+            _end.Y = top + yDelta;
         }
 
         public object Clone()
