@@ -20,6 +20,12 @@ namespace MyRoundedRect
         private double[]? _strokeDashArray;
 
         public IconKind Icon => IconKind.SquareRoundedOutline;
+        public string Name => "Rounded Rectangle";
+
+        public double Top => _topLeft.Y;
+        public double Left => _topLeft.X;
+        public double Bottom => _bottomRight.Y;
+        public double Right => _bottomRight.X;
 
         public void AddStart(Point point)
         {

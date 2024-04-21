@@ -19,6 +19,7 @@ namespace MyLine
         private double[]? _strokeDashArray;
 
         public IconKind Icon => IconKind.VectorLine;
+        public string Name => "Line";
 
         public double Top => _start.Y;
         public double Left => _start.X;

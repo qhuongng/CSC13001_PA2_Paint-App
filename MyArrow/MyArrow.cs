@@ -19,6 +19,7 @@ namespace MyArrow
         private double[]? _strokeDashArray;
 
         public IconKind Icon => IconKind.CallMade;
+        public string Name => "Arrow";
 
         public double Top => _start.Y;
         public double Left => _start.X;

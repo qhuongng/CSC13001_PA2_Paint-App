@@ -20,6 +20,7 @@ namespace MyRect
         private double[]? _strokeDashArray;
 
         public IconKind Icon => IconKind.SquareOutline;
+        public string Name => "Rectangle";
 
         public double Top => _topLeft.Y;
         public double Left => _topLeft.X;

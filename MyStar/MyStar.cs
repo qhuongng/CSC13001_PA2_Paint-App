@@ -18,6 +18,7 @@ namespace MyStar
         private double _strokeWidth;
         private double[]? _strokeDashArray;
         public IconKind Icon => IconKind.StarOutline;
+        public string Name => "Star";
 
         public double Top => _topLeft.Y;
         public double Left => _topLeft.X;

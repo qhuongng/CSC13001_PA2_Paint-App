@@ -21,6 +21,7 @@ namespace MyEllipse
 
 
         public IconKind Icon => IconKind.EllipseOutline;
+        public string Name => "Ellipse";
 
         public double Top => _topLeft.Y;
         public double Left => _topLeft.X;

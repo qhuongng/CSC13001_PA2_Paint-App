@@ -21,6 +21,7 @@ namespace MyHeart
 
 
         public IconKind Icon => IconKind.HeartOutline;
+        public string Name => "Heart";
 
         public double Top => _topLeft.Y;
         public double Left => _topLeft.X;

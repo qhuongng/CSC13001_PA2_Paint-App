@@ -18,6 +18,12 @@ namespace MyTriangle
         private double _strokeWidth;
         private double[]? _strokeDashArray;
         public IconKind Icon => IconKind.TriangleOutline;
+        public string Name => "Triangle";
+
+        public double Top => _topLeft.Y;
+        public double Left => _topLeft.X;
+        public double Bottom => _bottomRight.Y;
+        public double Right => _bottomRight.X;
 
         public void AddEnd(Point point)
         {
