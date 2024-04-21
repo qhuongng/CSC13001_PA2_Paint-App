@@ -20,5 +20,10 @@ namespace Shapes
         UIElement Convert();
 
         IconKind Icon { get; }
+        
+        double Top { get; }
+        double Left { get; }
+        double Bottom { get; }
+        double Right { get; }
     }
 }

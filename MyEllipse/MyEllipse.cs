@@ -22,6 +22,11 @@ namespace MyEllipse
 
         public IconKind Icon => IconKind.EllipseOutline;
 
+        public double Top => _topLeft.Y;
+        public double Left => _topLeft.X;
+        public double Bottom => _bottomRight.Y;
+        public double Right => _bottomRight.X;
+
         public void AddStart(Point point)
         {
             _topLeft = point;

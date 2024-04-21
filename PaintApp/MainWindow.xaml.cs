@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 
 namespace PaintApp
@@ -223,15 +224,15 @@ namespace PaintApp
 
                 if (_painter != null)
                 {
-                    _painter.SetStrokeDashArray(transferStrokeDashArray(StrokeType));
+                    _painter.SetStrokeDashArray(TransferStrokeDashArray(StrokeType));
                 }
             }
         }
 
-        private double[] transferStrokeDashArray(BitmapImage image)
+        private double[] TransferStrokeDashArray(BitmapImage image)
         {
             Uri uri = image.UriSource;
-            string fileName = Path.GetFileName(uri.LocalPath);
+            string fileName = System.IO.Path.GetFileName(uri.LocalPath);
 
             if (fileName.Equals("solid.png"))
             {
@@ -239,11 +240,11 @@ namespace PaintApp
             }
             else if (fileName.Equals("dash.png"))
             {
-                return new double[] { 5, 2 };
+                return [5, 2];
             }
             else
             {
-                return new double[] { 5, 2, 1, 2 };
+                return [5, 2, 1, 2];
             }
         }
     }

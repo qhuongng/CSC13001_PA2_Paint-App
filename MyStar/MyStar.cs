@@ -20,6 +20,11 @@ namespace MyStar
         private double[]? _strokeDashArray;
         public IconKind Icon => IconKind.StarOutline;
 
+        public double Top => _topLeft.Y;
+        public double Left => _topLeft.X;
+        public double Bottom => _bottomRight.Y;
+        public double Right => _bottomRight.X;
+
         public void AddEnd(Point point)
         {
             _bottomRight = point;

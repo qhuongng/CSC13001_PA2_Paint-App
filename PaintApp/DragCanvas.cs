@@ -19,8 +19,6 @@ namespace PaintApp
         private bool _isDragging;
         private Rectangle _selectionBounds;
 
-        private IShape _toModify;
-
         public List<IShape> Objects { get; set; }
 
         public DragCanvas()
@@ -146,14 +144,6 @@ namespace PaintApp
         {
             base.OnPreviewMouseUp(e);
             BoundSelectedElement();
-
-            if (_toModify != null)
-            {
-                MessageBox.Show("yay");
-                _toModify.SetPosition(GetTop(SelectedElement), GetLeft(SelectedElement));
-            }
-
-            _toModify = null;
             SelectedElement = null;
         }
 

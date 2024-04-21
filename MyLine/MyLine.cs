@@ -20,6 +20,11 @@ namespace MyLine
 
         public IconKind Icon => IconKind.VectorLine;
 
+        public double Top => _start.Y;
+        public double Left => _start.X;
+        public double Bottom => _end.Y;
+        public double Right => _end.X;
+
         public void AddStart(Point point)
         {
             _start = point;
