@@ -5,9 +5,9 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
-namespace MyRect
+namespace MyRoundedRect
 {
-    public class MyRect : IShape
+    public class MyRoundedRect : IShape
     {
         private Point _topLeft;
         private Point _bottomRight;
@@ -19,12 +19,7 @@ namespace MyRect
         private double _strokeWidth;
         private double[]? _strokeDashArray;
 
-        public IconKind Icon => IconKind.SquareOutline;
-
-        public double Top => _topLeft.Y;
-        public double Left => _topLeft.X;
-        public double Bottom => _bottomRight.Y;
-        public double Right => _bottomRight.X;
+        public IconKind Icon => IconKind.SquareRoundedOutline;
 
         public void AddStart(Point point)
         {
@@ -87,6 +82,8 @@ namespace MyRect
                 Fill = _fill,
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth,
+                RadiusX = 12,
+                RadiusY = 12
             };
             if (_strokeDashArray != null)
             {

@@ -13,11 +13,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyLine", "MyLine\MyLine.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRect", "MyRect\MyRect.csproj", "{29816E3C-5892-4C47-9F70-FB9669F5A825}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyArrow", "MyArrow\MyArrow.csproj", "{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStar", "MyStar\MyStar.csproj", "{B0195814-88E1-42AA-B7C1-0A01F04561D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyHeart", "MyHeart\MyHeart.csproj", "{79B45F74-F9BC-461C-AAFE-69164DA4A86D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyHeart", "MyHeart\MyHeart.csproj", "{79B45F74-F9BC-461C-AAFE-69164DA4A86D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyArrow", "MyArrow\MyArrow.csproj", "{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyTriangle", "MyTriangle\MyTriangle.csproj", "{30493C38-5628-431A-957E-2ABB24C637AC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyRoundedRect", "MyRoundedRect\MyRoundedRect.csproj", "{ECE29A43-65A2-4176-9BCE-C073C26AA7E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +61,14 @@ Global
 		{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AC1AD45-DB2B-4BBC-8D98-D3574D8635AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30493C38-5628-431A-957E-2ABB24C637AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30493C38-5628-431A-957E-2ABB24C637AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30493C38-5628-431A-957E-2ABB24C637AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30493C38-5628-431A-957E-2ABB24C637AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECE29A43-65A2-4176-9BCE-C073C26AA7E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECE29A43-65A2-4176-9BCE-C073C26AA7E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECE29A43-65A2-4176-9BCE-C073C26AA7E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECE29A43-65A2-4176-9BCE-C073C26AA7E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

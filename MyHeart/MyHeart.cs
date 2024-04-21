@@ -1,8 +1,8 @@
 ﻿using Shapes;
-using System.Windows.Controls;
-using System.Windows.Shapes;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
 namespace MyHeart
@@ -92,19 +92,24 @@ namespace MyHeart
                 height = circleDiameter;
             }
 
+            
+
             // Calculate the center point of the heart shape
             Point center = new Point((_topLeft.X + _bottomRight.X) / 2, (_topLeft.Y + _bottomRight.Y) / 2);
-
+            double minX = center.X - width / 2 - width/30 - _strokeWidth/2;
+            double maxX = center.X + width / 2 + width/30 + _strokeWidth/2;
+            double minY = center.Y - height / 2 - height/6.25 - _strokeWidth / 2;
+            double maxY = center.Y + height / 2 + _strokeWidth / 1.25;
             // Create the PathGeometry to define the heart shape
             PathGeometry heartGeometry = new PathGeometry();
 
             PathFigure heartFigure = new PathFigure();
-            heartFigure.StartPoint = new Point(center.X, center.Y + height / 4); // Starting point at the bottom center
+            heartFigure.StartPoint = new Point(center.X - minX, center.Y + height / 2 - minY); // Starting point at the bottom center
 
-            heartFigure.Segments.Add(new LineSegment(new Point(center.X - width/2, center.Y - height / 4), true)); // Draw the left line segment
-                                                                                                                   // Draw the left arc of the heart
+            heartFigure.Segments.Add(new LineSegment(new Point(center.X - width / 2 - minX, center.Y - height / 4 - minY), true)); // Draw the left line segment
+                                                                                                                     // Draw the left arc of the heart
             ArcSegment leftArc = new ArcSegment(
-                new Point(center.X, center.Y - height / 2),
+                new Point(center.X - minX, center.Y - height / 2 - minY),
                 new Size(width / 4, height / 4),
                 0,
                 false,
@@ -115,7 +120,7 @@ namespace MyHeart
 
             // Draw the right arc of the heart
             ArcSegment rightArc = new ArcSegment(
-                new Point(center.X + width/2, center.Y - height / 4),
+                new Point(center.X + width / 2 - minX, center.Y - height / 4 - minY),
                 new Size(width / 4, height / 4),
                 0,
                 false,
@@ -123,8 +128,8 @@ namespace MyHeart
                 true);
 
             heartFigure.Segments.Add(rightArc);
-            heartFigure.Segments.Add(new LineSegment(new Point(center.X, center.Y + height / 4), true)); // Draw the right line segment
-
+            heartFigure.Segments.Add(new LineSegment(new Point(center.X - minX, center.Y + height / 2 - minY), true)); // Draw the right line segment
+            heartFigure.IsClosed = true;
             // Add the heart figure to the PathGeometry
             heartGeometry.Figures.Add(heartFigure);
 
@@ -136,7 +141,20 @@ namespace MyHeart
             heartPath.StrokeDashArray = new DoubleCollection(_strokeDashArray ?? new double[] { });
             heartPath.Data = heartGeometry;
 
-            return heartPath;
+            double boundingWidth = maxX - minX;
+            double boundingHeight = maxY - minY;
+
+            // create a container Grid to hold the star
+            Grid containerGrid = new Grid();
+            containerGrid.Width = boundingWidth;
+            containerGrid.Height = boundingHeight;
+            containerGrid.Children.Add(heartPath);
+
+            // Set the position of the containerGrid
+            Canvas.SetLeft(containerGrid, minX);
+            Canvas.SetTop(containerGrid, minY);
+
+            return containerGrid;
         }
 
     }
