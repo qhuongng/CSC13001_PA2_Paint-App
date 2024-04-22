@@ -152,6 +152,17 @@ namespace PaintApp
             {
                 _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             }
+            if(_selectedElement != null)
+            {
+                _selectedElement.Painter.SetFillColor((SolidColorBrush)FillClr.Background);
+                DrawingCanvas.Children.Clear();
+                
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+                SetSelected();
+            }
         }
 
         private void ColorBtn_Click(object sender, RoutedEventArgs e)
@@ -230,7 +241,7 @@ namespace PaintApp
                 ShapeList.Add(newShape);
 
                 // select the shape after drawing
-                SelectionPane.SelectedItem = newShape;
+                //SelectionPane.SelectedItem = newShape;
             }
         }
 
