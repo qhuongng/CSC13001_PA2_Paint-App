@@ -60,17 +60,6 @@ namespace MyTriangle
             _strokeDashArray = strokeDashArray;
         }
 
-        public void SetPosition(double top, double left)
-        {
-            double xDelta = _bottomRight.X - _topLeft.X;
-            double yDelta = _bottomRight.Y - _topLeft.Y;
-
-            _topLeft.X = left;
-            _topLeft.Y = top;
-            _bottomRight.X = left + xDelta;
-            _bottomRight.Y = top + yDelta;
-        }
-
         public object Clone()
         {
             return MemberwiseClone();
@@ -88,20 +77,23 @@ namespace MyTriangle
                 width = circleDiameter;
                 height = circleDiameter;
             }
+
             Polygon triangle = new Polygon();
 
-            // Set the Fill color
+            // set the fill color
             triangle.Fill = _fill;
 
-
-            // Set the Stroke color and width
+            // set the stroke color and width
             triangle.Stroke = _stroke;
             triangle.StrokeThickness = _strokeWidth;
+
             if (_strokeDashArray != null)
             {
                 triangle.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
+
             PointCollection points = new PointCollection();
+
             if (_topLeft.X >= _bottomRight.X)
             {
                 if (_topLeft.Y >= _bottomRight.Y)
@@ -132,10 +124,12 @@ namespace MyTriangle
                     points.Add(new Point(_bottomRight.X, _bottomRight.Y)); // Bottom right point
                 }
             }
+
             double minX = points.Min(p => p.X);
             double maxX = points.Max(p => p.X);
             double minY = points.Min(p => p.Y);
             double maxY = points.Max(p => p.Y);
+
             double boundingWidth = maxX - minX;
             double boundingHeight = maxY - minY;
 
@@ -143,16 +137,18 @@ namespace MyTriangle
             {
                 triangle.Points.Add(new Point(i.X - minX, i.Y - minY));
             }
-            Grid containerGrid = new Grid();
-            containerGrid.Width = boundingWidth;
-            containerGrid.Height = boundingHeight;
-            containerGrid.Children.Add(triangle);
 
-            // Set the position of the containerGrid
-            Canvas.SetLeft(containerGrid, minX);
-            Canvas.SetTop(containerGrid, minY);
+            Grid container = new Grid();
 
-            return containerGrid;
+            container.Width = boundingWidth;
+            container.Height = boundingHeight;
+            container.Children.Add(triangle);
+
+            // set the position of the containerGrid
+            Canvas.SetLeft(container, minX);
+            Canvas.SetTop(container, minY);
+
+            return container;
         }
 
     }

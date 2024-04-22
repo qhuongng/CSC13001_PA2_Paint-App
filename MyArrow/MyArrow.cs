@@ -58,17 +58,6 @@ namespace MyArrow
             _strokeDashArray = strokeDashArray;
         }
 
-        public void SetPosition(double top, double left)
-        {
-            double xDelta = _end.X - _start.X;
-            double yDelta = _end.Y - _start.Y;
-
-            _start.X = left;
-            _start.Y = top;
-            _end.X = left + xDelta;
-            _end.Y = top + yDelta;
-        }
-
         public object Clone()
         {
             return MemberwiseClone();
@@ -80,6 +69,7 @@ namespace MyArrow
             double vx = _end.X - _start.X;
             double vy = _end.Y - _start.Y;
             double dist = (double)Math.Sqrt(vx * vx + vy * vy);
+
             vx /= dist;
             vy /= dist;
 
@@ -133,7 +123,7 @@ namespace MyArrow
             };
 
             // combine arrow line and arrowhead into a single container
-            Canvas container = new Canvas
+            Grid container = new Grid
             {
                 Width = width,
                 Height = height

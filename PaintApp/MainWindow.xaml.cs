@@ -9,18 +9,21 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
+using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
 namespace PaintApp
 {
-    public class ElementShapePair
+    public class ShapeElement
     {
         public UIElement Element { get; set; }
-        public IShape Painter { get; set; }
+        public string ElementName { get; set; }
+        public IconKind ElementIcon { get; set; }
 
-        public ElementShapePair(UIElement element, IShape painter)
+        public ShapeElement(UIElement element, string name, IconKind icon)
         {
             Element = element;
-            Painter = painter;
+            ElementName = name;
+            ElementIcon = icon;
         }
     }
 
@@ -48,10 +51,10 @@ namespace PaintApp
         public ObservableCollection<BitmapImage> StrokeTypes { get; set; }
         public BitmapImage StrokeType { get; set; }
 
-        public ObservableCollection<ElementShapePair> ShapeList { get; set; }
+        public ObservableCollection<ShapeElement> ShapeList { get; set; }
 
-        ElementShapePair _selectedElement = null;
-        ElementShapePair _prevSelectedElement = null;
+        ShapeElement _selectedElement = null;
+        ShapeElement _prevSelectedElement = null;
 
         Rectangle _selectionBounds = null;
         
@@ -70,7 +73,7 @@ namespace PaintApp
             StrokeTypes = new ObservableCollection<BitmapImage> { solid, dash, dash_dot };
             StrokeType = StrokeTypes[0];
 
-            ShapeList = new ObservableCollection<ElementShapePair>();
+            ShapeList = new ObservableCollection<ShapeElement>();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -115,7 +118,7 @@ namespace PaintApp
                         Tag = item,
                     };
 
-                    control.Click += Control_Click;
+                    control.Click += ShapeBtn_Click;
 
                     Grid.SetRow(control, i);
                     Grid.SetColumn(control, j);
@@ -142,6 +145,7 @@ namespace PaintApp
             }
         }
 
+        // change fill color on right-click
         private void ColorBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Button b = (Button)sender;
@@ -152,19 +156,43 @@ namespace PaintApp
             {
                 _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             }
-            if(_selectedElement != null)
+
+            if (_selectedElement != null)
             {
-                _selectedElement.Painter.SetFillColor((SolidColorBrush)FillClr.Background);
+                if (_selectedElement.Element is Shape)
+                {
+                    (_selectedElement.Element as Shape).Fill = FillClr.Background;
+                }
+                else if (_selectedElement.Element is Grid)
+                {
+                    // custom shapes consists of Path(s) wrapped inside a Grid
+                    // find all Paths that are child of the grid and modify their colors
+                    foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                    {
+                        if (child is System.Windows.Shapes.Path)
+                        {
+                            System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
+                            path.Fill = FillClr.Background;
+                        }
+                        else if (child is Shape)
+                        {
+                            (child as Shape).Fill = FillClr.Background;
+                        }
+                    }
+                }
+
                 DrawingCanvas.Children.Clear();
-                
+
                 foreach (var shape in ShapeList)
                 {
                     DrawingCanvas.Children.Add(shape.Element);
                 }
+
                 SetSelected();
             }
         }
 
+        // change stroke color on left-click
         private void ColorBtn_Click(object sender, RoutedEventArgs e)
         {
             Button b = (Button)sender;
@@ -175,9 +203,40 @@ namespace PaintApp
             {
                 _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
             }
+
+            if (_selectedElement != null)
+            {
+                if (_selectedElement.Element is Shape)
+                {
+                    (_selectedElement.Element as Shape).Stroke = StrokeClr.Background;
+                }
+                else if (_selectedElement.Element is Grid) {
+                    foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                    {
+                        if (child is System.Windows.Shapes.Path)
+                        {
+                            System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
+                            path.Stroke = StrokeClr.Background;
+                        }
+                        else if (child is Shape)
+                        {
+                            (child as Shape).Stroke = StrokeClr.Background;
+                        }
+                    }
+                }
+
+                DrawingCanvas.Children.Clear();
+
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+
+                SetSelected();
+            }
         }
 
-        private void Control_Click(object sender, RoutedEventArgs e)
+        private void ShapeBtn_Click(object sender, RoutedEventArgs e)
         {
             IShape item = (IShape)(sender as RadioButton)!.Tag;
 
@@ -187,10 +246,14 @@ namespace PaintApp
             _painter.SetStrokeWidth(StrokeWidth);
             _painter.SetStrokeDashArray(TransferStrokeDashArray(StrokeType));
 
+            DrawingCanvas.Children.Remove(_selectionBounds);
+            SelectionPane.UnselectAll();
+            SetSelected();
+
             CanvasHelper.Visibility = Visibility.Visible;
         }
 
-        private void FirstBtnGrp_Click(object sender, RoutedEventArgs e)
+        private void MoveBtn_Click(object sender, RoutedEventArgs e)
         {
             _painter = null;
 
@@ -236,12 +299,10 @@ namespace PaintApp
             {
                 _isDrawing = false;
 
-                ElementShapePair newShape = new ElementShapePair(_visual, (IShape)_painter.Clone());
+                IShape clone = (IShape)_painter.Clone();
+                ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon );
 
                 ShapeList.Add(newShape);
-
-                // select the shape after drawing
-                //SelectionPane.SelectedItem = newShape;
             }
         }
 
@@ -256,18 +317,94 @@ namespace PaintApp
                 StrokeWidth = width;
                 _painter.SetStrokeWidth(StrokeWidth);
             }
+
+            if (_selectedElement != null)
+            {
+                if (_selectedElement.Element is Shape)
+                {
+                    (_selectedElement.Element as Shape).StrokeThickness = StrokeWidth;
+                }
+                else if (_selectedElement.Element is Grid)
+                {
+                    // custom shapes consists of Path(s) wrapped inside a Grid
+                    // find all Paths that are child of the grid and modify their colors
+                    foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                    {
+                        if (child is System.Windows.Shapes.Path)
+                        {
+                            System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
+                            path.StrokeThickness = StrokeWidth;
+                        }
+                        else if (child is Shape)
+                        {
+                            (child as Shape).StrokeThickness = StrokeWidth;
+                        }
+                    }
+                }
+
+                DrawingCanvas.Children.Clear();
+
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+
+                SetSelected();
+            }
         }
 
         private void StrokeTypeCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ComboBox comboBox = (ComboBox)sender;
-            if (comboBox.SelectedItem != null)
+            ComboBox strokeTypeCb = (ComboBox)sender;
+
+            if (strokeTypeCb.SelectedItem != null)
             {
-                StrokeType = (BitmapImage)comboBox.SelectedItem;
+                StrokeType = (BitmapImage)strokeTypeCb.SelectedItem;
 
                 if (_painter != null)
                 {
                     _painter.SetStrokeDashArray(TransferStrokeDashArray(StrokeType));
+                }
+
+                if (_selectedElement != null)
+                {
+                    DoubleCollection newParam = new DoubleCollection(0);
+
+                    if (TransferStrokeDashArray(StrokeType) != null)
+                    {
+                        newParam = new DoubleCollection(TransferStrokeDashArray(StrokeType));
+                    }
+
+                    if (_selectedElement.Element is Shape)
+                    {
+                        (_selectedElement.Element as Shape).StrokeDashArray = newParam;
+                    }
+                    else if (_selectedElement.Element is Grid)
+                    {
+                        // custom shapes consists of Path(s) wrapped inside a Grid
+                        // find all Paths that are child of the grid and modify their colors
+                        foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                        {
+                            if (child is System.Windows.Shapes.Path)
+                            {
+                                System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
+                                path.StrokeDashArray = newParam;
+                            }
+                            else if (child is Shape)
+                            {
+                                (child as Shape).StrokeDashArray = newParam;
+                            }
+                        }
+                    }
+
+                    DrawingCanvas.Children.Clear();
+
+                    foreach (var shape in ShapeList)
+                    {
+                        DrawingCanvas.Children.Add(shape.Element);
+                    }
+
+                    SetSelected();
                 }
             }
         }
@@ -314,8 +451,6 @@ namespace PaintApp
 
                 Canvas.SetLeft(_selectedElement.Element, left + (newPoint.X - _dragStart.X));
                 Canvas.SetTop(_selectedElement.Element, top + (newPoint.Y - _dragStart.Y));
-
-                _selectedElement.Painter.SetPosition(top + (newPoint.Y - _dragStart.Y), left + (newPoint.X - _dragStart.X));
 
                 _dragStart = newPoint;
             }
@@ -375,7 +510,7 @@ namespace PaintApp
                 _prevSelectedElement.Element.MouseUp -= Element_MouseUp;
             }
 
-            _selectedElement = (ElementShapePair)SelectionPane.SelectedItem;
+            _selectedElement = (ShapeElement)SelectionPane.SelectedItem;
 
             if (_selectedElement != null)
             {
@@ -385,6 +520,10 @@ namespace PaintApp
 
                 DrawingCanvas.Children.Remove(_selectionBounds);
                 BoundSelectedElement();
+
+                // activate the move tool by default
+                BtnMove.IsChecked = true;
+                MoveBtn_Click(null, null);
             }
         }
     }

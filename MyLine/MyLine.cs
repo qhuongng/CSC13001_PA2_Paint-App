@@ -1,6 +1,9 @@
 ﻿using Shapes;
+using System.Net.NetworkInformation;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
@@ -61,17 +64,6 @@ namespace MyLine
             _strokeDashArray = strokeDashArray;
         }
 
-        public void SetPosition(double top, double left)
-        {
-            double xDelta = _end.X - _start.X;
-            double yDelta = _end.Y - _start.Y;
-
-            _start.X = left;
-            _start.Y = top;
-            _end.X = left + xDelta;
-            _end.Y = top + yDelta;
-        }
-
         public object Clone()
         {
             return MemberwiseClone();
@@ -79,12 +71,21 @@ namespace MyLine
 
         public UIElement Convert()
         {
+            // calculate the bounding box of the arrow
+            double minX = Math.Min(_start.X, _end.X);
+            double minY = Math.Min(_start.Y, _end.Y);
+            double maxX = Math.Max(_start.X, _end.X);
+            double maxY = Math.Max(_start.Y, _end.Y);
+
+            double width = maxX - minX;
+            double height = maxY - minY;
+
             Line l = new Line()
             {
-                X1 = _start.X,
-                Y1 = _start.Y,
-                X2 = _end.X,
-                Y2 = _end.Y,
+                X1 = _start.X - minX,
+                Y1 = _start.Y - minY,
+                X2 = _end.X - minX,
+                Y2 = _end.Y - minY,
                 StrokeThickness = _strokeWidth,
                 Stroke = _stroke,
             };
@@ -94,7 +95,33 @@ namespace MyLine
                 l.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
 
-            return l;
+            Grid container = new Grid
+            {
+                Width = width,
+                Height = height
+            };
+
+            container.Children.Add(l);
+
+            if (_end.X >= _start.X)
+            {
+                container.SetValue(Canvas.LeftProperty, _start.X);
+            }
+            else
+            {
+                container.SetValue(Canvas.LeftProperty, _end.X);
+            }
+
+            if (_end.Y >= _start.Y)
+            {
+                container.SetValue(Canvas.TopProperty, _start.Y);
+            }
+            else
+            {
+                container.SetValue(Canvas.TopProperty, _end.Y);
+            }
+
+            return container;
         }
     }
 

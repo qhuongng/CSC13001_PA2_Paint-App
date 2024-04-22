@@ -14,11 +14,11 @@ namespace Shapes
         void SetFillColor(SolidColorBrush color);
         void SetStrokeWidth(double width);
         void SetStrokeDashArray(double[] strokeDashArray);
-        void SetPosition(double top, double left);
 
         UIElement Convert();
 
         IconKind Icon { get; }
+        string Name { get; }
         
         double Top { get; }
         double Left { get; }

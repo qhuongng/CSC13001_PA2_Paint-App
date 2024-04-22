@@ -63,17 +63,6 @@ namespace MyHeart
             _strokeDashArray = strokeDashArray;
         }
 
-        public void SetPosition(double top, double left)
-        {
-            double xDelta = _bottomRight.X - _topLeft.X;
-            double yDelta = _bottomRight.Y - _topLeft.Y;
-
-            _topLeft.X = left;
-            _topLeft.Y = top;
-            _bottomRight.X = left + xDelta;
-            _bottomRight.Y = top + yDelta;
-        }
-
         public object Clone()
         {
             return MemberwiseClone();
@@ -93,22 +82,22 @@ namespace MyHeart
                 height = circleDiameter;
             }
 
-            
-
-            // Calculate the center point of the heart shape
+            // calculate the center point of the heart shape
             Point center = new Point((_topLeft.X + _bottomRight.X) / 2, (_topLeft.Y + _bottomRight.Y) / 2);
-            double minX = center.X - width / 2 - width/30 - _strokeWidth/2;
-            double maxX = center.X + width / 2 + width/30 + _strokeWidth/2;
-            double minY = center.Y - height / 2 - height/6.25 - _strokeWidth / 2;
+
+            double minX = center.X - width / 2 - width / 30 - _strokeWidth / 2;
+            double maxX = center.X + width / 2 + width / 30 + _strokeWidth / 2;
+            double minY = center.Y - height / 2 - height / 6.25 - _strokeWidth / 2;
             double maxY = center.Y + height / 2 + _strokeWidth / 1.25;
-            // Create the PathGeometry to define the heart shape
+
+            // create the PathGeometry to define the heart shape
             PathGeometry heartGeometry = new PathGeometry();
 
             PathFigure heartFigure = new PathFigure();
-            heartFigure.StartPoint = new Point(center.X - minX, center.Y + height / 2 - minY); // Starting point at the bottom center
+            heartFigure.StartPoint = new Point(center.X - minX, center.Y + height / 2 - minY); // starting point at the bottom center
 
-            heartFigure.Segments.Add(new LineSegment(new Point(center.X - width / 2 - minX, center.Y - height / 4 - minY), true)); // Draw the left line segment
-                                                                                                                     // Draw the left arc of the heart
+            heartFigure.Segments.Add(new LineSegment(new Point(center.X - width / 2 - minX, center.Y - height / 4 - minY), true)); // draw the left line segment
+                                                                                                                     // draw the left arc of the heart
             ArcSegment leftArc = new ArcSegment(
                 new Point(center.X - minX, center.Y - height / 2 - minY),
                 new Size(width / 4, height / 4),
@@ -119,7 +108,7 @@ namespace MyHeart
 
             heartFigure.Segments.Add(leftArc);
 
-            // Draw the right arc of the heart
+            // draw the right arc of the heart
             ArcSegment rightArc = new ArcSegment(
                 new Point(center.X + width / 2 - minX, center.Y - height / 4 - minY),
                 new Size(width / 4, height / 4),
@@ -129,13 +118,15 @@ namespace MyHeart
                 true);
 
             heartFigure.Segments.Add(rightArc);
-            heartFigure.Segments.Add(new LineSegment(new Point(center.X - minX, center.Y + height / 2 - minY), true)); // Draw the right line segment
+            heartFigure.Segments.Add(new LineSegment(new Point(center.X - minX, center.Y + height / 2 - minY), true)); // draw the right line segment
             heartFigure.IsClosed = true;
-            // Add the heart figure to the PathGeometry
+
+            // add the heart figure to the PathGeometry
             heartGeometry.Figures.Add(heartFigure);
 
-            // Create the Path object to draw the heart shape
+            // create the Path object to draw the heart shape
             Path heartPath = new Path();
+
             heartPath.Fill = _fill;
             heartPath.Stroke = _stroke;
             heartPath.StrokeThickness = _strokeWidth;
@@ -146,16 +137,17 @@ namespace MyHeart
             double boundingHeight = maxY - minY;
 
             // create a container Grid to hold the star
-            Grid containerGrid = new Grid();
-            containerGrid.Width = boundingWidth;
-            containerGrid.Height = boundingHeight;
-            containerGrid.Children.Add(heartPath);
+            Grid container = new Grid();
+
+            container.Width = boundingWidth;
+            container.Height = boundingHeight;
+            container.Children.Add(heartPath);
 
             // Set the position of the containerGrid
-            Canvas.SetLeft(containerGrid, minX);
-            Canvas.SetTop(containerGrid, minY);
+            Canvas.SetLeft(container, minX);
+            Canvas.SetTop(container, minY);
 
-            return containerGrid;
+            return container;
         }
 
     }

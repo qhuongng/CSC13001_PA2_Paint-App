@@ -60,17 +60,6 @@ namespace MyStar
             _strokeDashArray = strokeDashArray;
         }
 
-        public void SetPosition(double top, double left)
-        {
-            double xDelta = _bottomRight.X - _topLeft.X;
-            double yDelta = _bottomRight.Y - _topLeft.Y;
-
-            _topLeft.X = left;
-            _topLeft.Y = top;
-            _bottomRight.X = left + xDelta;
-            _bottomRight.Y = top + yDelta;
-        }
-
         public object Clone()
         {
             return MemberwiseClone();
@@ -156,16 +145,17 @@ namespace MyStar
             double boundingHeight = maxY - minY;
 
             // create a container Grid to hold the star
-            Grid containerGrid = new Grid();
-            containerGrid.Width = boundingWidth;
-            containerGrid.Height = boundingHeight;
-            containerGrid.Children.Add(starPath);
+            Grid container = new Grid();
+
+            container.Width = boundingWidth;
+            container.Height = boundingHeight;
+            container.Children.Add(starPath);
 
             // Set the position of the containerGrid
-            Canvas.SetLeft(containerGrid, minX);
-            Canvas.SetTop(containerGrid, minY);
+            Canvas.SetLeft(container, minX);
+            Canvas.SetTop(container, minY);
 
-            return containerGrid;
+            return container;
         }
 
     }

@@ -61,17 +61,6 @@ namespace MyRoundedRect
             _strokeDashArray = strokeDashArray;
         }
 
-        public void SetPosition(double top, double left)
-        {
-            double xDelta = _bottomRight.X - _topLeft.X;
-            double yDelta = _bottomRight.Y - _topLeft.Y;
-
-            _topLeft.X = left;
-            _topLeft.Y = top;
-            _bottomRight.X = left + xDelta;
-            _bottomRight.Y = top + yDelta;
-        }
-
         public object Clone()
         {
             return MemberwiseClone();
@@ -83,7 +72,7 @@ namespace MyRoundedRect
             double height = Math.Abs(_bottomRight.Y - _topLeft.Y);
             double circleDiameter = Math.Min(width, height);
 
-            Rectangle e = new Rectangle()
+            Rectangle r = new Rectangle()
             {
                 Fill = _fill,
                 Stroke = _stroke,
@@ -91,49 +80,50 @@ namespace MyRoundedRect
                 RadiusX = 12,
                 RadiusY = 12
             };
+
             if (_strokeDashArray != null)
             {
-                e.StrokeDashArray = new DoubleCollection(_strokeDashArray);
+                r.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
 
             if (_isShiftPressed)
             {
-                // draw a circle
-                e.Width = circleDiameter;
-                e.Height = circleDiameter;
+                // draw a square
+                r.Width = circleDiameter;
+                r.Height = circleDiameter;
             }
             else
             {
-                // draw an ellipse
-                e.Width = width;
-                e.Height = height;
+                // draw a rectangle
+                r.Width = width;
+                r.Height = height;
             }
 
             if (_bottomRight.X >= _topLeft.X)
             {
-                e.SetValue(Canvas.LeftProperty, _topLeft.X);
+                r.SetValue(Canvas.LeftProperty, _topLeft.X);
             }
             else
             {
                 if (_isShiftPressed)
-                    e.SetValue(Canvas.LeftProperty, _topLeft.X - circleDiameter);
+                    r.SetValue(Canvas.LeftProperty, _topLeft.X - circleDiameter);
                 else
-                    e.SetValue(Canvas.LeftProperty, _topLeft.X - width);
+                    r.SetValue(Canvas.LeftProperty, _topLeft.X - width);
             }
 
             if (_bottomRight.Y >= _topLeft.Y)
             {
-                e.SetValue(Canvas.TopProperty, _topLeft.Y);
+                r.SetValue(Canvas.TopProperty, _topLeft.Y);
             }
             else
             {
                 if (_isShiftPressed)
-                    e.SetValue(Canvas.TopProperty, _topLeft.Y - circleDiameter);
+                    r.SetValue(Canvas.TopProperty, _topLeft.Y - circleDiameter);
                 else
-                    e.SetValue(Canvas.TopProperty, _topLeft.Y - height);
+                    r.SetValue(Canvas.TopProperty, _topLeft.Y - height);
             }
 
-            return e;
+            return r;
         }
     }
 }
