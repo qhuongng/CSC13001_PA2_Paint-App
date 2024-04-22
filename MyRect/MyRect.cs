@@ -77,7 +77,9 @@ namespace MyRect
                 Fill = _fill,
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth,
+                StrokeLineJoin = PenLineJoin.Round
             };
+
             if (_strokeDashArray != null)
             {
                 e.StrokeDashArray = new DoubleCollection(_strokeDashArray);

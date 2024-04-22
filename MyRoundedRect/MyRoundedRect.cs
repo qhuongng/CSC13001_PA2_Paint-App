@@ -77,6 +77,7 @@ namespace MyRoundedRect
                 Fill = _fill,
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth,
+                StrokeLineJoin = PenLineJoin.Round,
                 RadiusX = 12,
                 RadiusY = 12
             };

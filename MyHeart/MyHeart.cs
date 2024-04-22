@@ -131,6 +131,7 @@ namespace MyHeart
             heartPath.Stroke = _stroke;
             heartPath.StrokeThickness = _strokeWidth;
             heartPath.StrokeDashArray = new DoubleCollection(_strokeDashArray ?? new double[] { });
+            heartPath.StrokeLineJoin = PenLineJoin.Round;
             heartPath.Data = heartGeometry;
 
             double boundingWidth = maxX - minX;

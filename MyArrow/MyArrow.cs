@@ -119,7 +119,8 @@ namespace MyArrow
             {
                 Data = arrowGeometry,
                 Stroke = _stroke,
-                StrokeThickness = _strokeWidth
+                StrokeThickness = _strokeWidth,
+                StrokeLineJoin = PenLineJoin.Round
             };
 
             // combine arrow line and arrowhead into a single container

@@ -71,23 +71,15 @@ namespace MyLine
 
         public UIElement Convert()
         {
-            // calculate the bounding box of the arrow
-            double minX = Math.Min(_start.X, _end.X);
-            double minY = Math.Min(_start.Y, _end.Y);
-            double maxX = Math.Max(_start.X, _end.X);
-            double maxY = Math.Max(_start.Y, _end.Y);
-
-            double width = maxX - minX;
-            double height = maxY - minY;
-
             Line l = new Line()
             {
-                X1 = _start.X - minX,
-                Y1 = _start.Y - minY,
-                X2 = _end.X - minX,
-                Y2 = _end.Y - minY,
+                X1 = _start.X,
+                Y1 = _start.Y,
+                X2 = _end.X,
+                Y2 = _end.Y,
                 StrokeThickness = _strokeWidth,
                 Stroke = _stroke,
+                StrokeLineJoin = PenLineJoin.Round
             };
 
             if (_strokeDashArray != null)
@@ -95,33 +87,7 @@ namespace MyLine
                 l.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
 
-            Grid container = new Grid
-            {
-                Width = width,
-                Height = height
-            };
-
-            container.Children.Add(l);
-
-            if (_end.X >= _start.X)
-            {
-                container.SetValue(Canvas.LeftProperty, _start.X);
-            }
-            else
-            {
-                container.SetValue(Canvas.LeftProperty, _end.X);
-            }
-
-            if (_end.Y >= _start.Y)
-            {
-                container.SetValue(Canvas.TopProperty, _start.Y);
-            }
-            else
-            {
-                container.SetValue(Canvas.TopProperty, _end.Y);
-            }
-
-            return container;
+            return l;
         }
     }
 

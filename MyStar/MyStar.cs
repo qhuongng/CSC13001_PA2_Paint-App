@@ -137,6 +137,7 @@ namespace MyStar
             starPath.Fill = _fill;
             starPath.Stroke = _stroke;
             starPath.StrokeThickness = _strokeWidth;
+            starPath.StrokeLineJoin = PenLineJoin.Round;
             starPath.StrokeDashArray = new DoubleCollection(_strokeDashArray ?? new double[] { });
             starPath.Data = starGeometry;
 

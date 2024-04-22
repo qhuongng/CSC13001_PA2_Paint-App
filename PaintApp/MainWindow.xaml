@@ -139,12 +139,13 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <ComboBox x:Name="StrokeWidthCb" Grid.Row="0" IsTextSearchEnabled="True" IsEditable="True" HorizontalAlignment="Stretch" TextBoxBase.TextChanged="StrokeWidthCb_TextChanged"
-                                  ItemsSource="{Binding StrokeWidths}" Text="{Binding StrokeWidth, Mode=TwoWay}" Background="#555555" Foreground="White" Margin="0,0,0,8" VerticalAlignment="Stretch" />
+                        <ComboBox x:Name="StrokeWidthCb" Grid.Row="0" HorizontalAlignment="Stretch" SelectionChanged="StrokeWidthCb_SelectionChanged"
+                                  ItemsSource="{Binding StrokeWidths}" Background="#343434" Foreground="White"
+                                  SelectedItem="{Binding StrokeWidth, Mode=TwoWay}" />
 
                         <ComboBox x:Name="StrokeTypeCb" Grid.Row="1" HorizontalAlignment="Stretch" SelectionChanged="StrokeTypeCb_SelectionChanged"
                                   ItemsSource="{Binding StrokeTypes}" Background="#343434" Foreground="White"
-                                  SelectedItem="{Binding StrokeType, Mode=TwoWay}">
+                                  SelectedItem="{Binding StrokeType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <Image Stretch="Uniform" Source="{Binding}"/>

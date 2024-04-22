@@ -86,6 +86,7 @@ namespace MyTriangle
             // set the stroke color and width
             triangle.Stroke = _stroke;
             triangle.StrokeThickness = _strokeWidth;
+            triangle.StrokeLineJoin = PenLineJoin.Round;
 
             if (_strokeDashArray != null)
             {

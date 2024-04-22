@@ -67,8 +67,8 @@ namespace PaintApp
             KeyDown += Canvas_KeyDown;
             KeyUp += Canvas_KeyUp;
 
-            StrokeWidths = new ObservableCollection<double> { 1, 2, 4, 8, 10, 12, 16, 20, 24, 32 };
-            StrokeWidth = 2;
+            StrokeWidths = new ObservableCollection<double> { 1, 3, 5, 8 };
+            StrokeWidth = 1;
 
             StrokeTypes = new ObservableCollection<BitmapImage> { solid, dash, dash_dot };
             StrokeType = StrokeTypes[0];
@@ -244,7 +244,7 @@ namespace PaintApp
             _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
             _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             _painter.SetStrokeWidth(StrokeWidth);
-            _painter.SetStrokeDashArray(TransferStrokeDashArray(StrokeType));
+            _painter.SetStrokeDashArray(BitmapToDashArray(StrokeType));
 
             DrawingCanvas.Children.Remove(_selectionBounds);
             SelectionPane.UnselectAll();
@@ -306,50 +306,52 @@ namespace PaintApp
             }
         }
 
-        private void StrokeWidthCb_TextChanged(object sender, TextChangedEventArgs e)
+        private void StrokeWidthCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            double testInput;
+            ComboBox strokeWidthCb = (ComboBox)sender;
 
-            if (_painter != null && StrokeWidthCb.Text.Length > 0 && double.TryParse(StrokeWidthCb.Text, out testInput))
+            if (strokeWidthCb.SelectedItem != null)
             {
-                double width = double.Parse(StrokeWidthCb.Text);
+                StrokeWidth = (double)strokeWidthCb.SelectedItem;
 
-                StrokeWidth = width;
-                _painter.SetStrokeWidth(StrokeWidth);
-            }
-
-            if (_selectedElement != null)
-            {
-                if (_selectedElement.Element is Shape)
+                if (_painter != null)
                 {
-                    (_selectedElement.Element as Shape).StrokeThickness = StrokeWidth;
+                    _painter.SetStrokeWidth(StrokeWidth);
                 }
-                else if (_selectedElement.Element is Grid)
+
+                if (_selectedElement != null)
                 {
-                    // custom shapes consists of Path(s) wrapped inside a Grid
-                    // find all Paths that are child of the grid and modify their colors
-                    foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                    if (_selectedElement.Element is Shape)
                     {
-                        if (child is System.Windows.Shapes.Path)
+                        (_selectedElement.Element as Shape).StrokeThickness = StrokeWidth;
+                    }
+                    else if (_selectedElement.Element is Grid)
+                    {
+                        // custom shapes consists of Path(s) wrapped inside a Grid
+                        // find all Paths that are child of the grid and modify their colors
+                        foreach (UIElement child in (_selectedElement.Element as Grid).Children)
                         {
-                            System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
-                            path.StrokeThickness = StrokeWidth;
-                        }
-                        else if (child is Shape)
-                        {
-                            (child as Shape).StrokeThickness = StrokeWidth;
+                            if (child is System.Windows.Shapes.Path)
+                            {
+                                System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
+                                path.StrokeThickness = StrokeWidth;
+                            }
+                            else if (child is Shape)
+                            {
+                                (child as Shape).StrokeThickness = StrokeWidth;
+                            }
                         }
                     }
+
+                    DrawingCanvas.Children.Clear();
+
+                    foreach (var shape in ShapeList)
+                    {
+                        DrawingCanvas.Children.Add(shape.Element);
+                    }
+
+                    SetSelected();
                 }
-
-                DrawingCanvas.Children.Clear();
-
-                foreach (var shape in ShapeList)
-                {
-                    DrawingCanvas.Children.Add(shape.Element);
-                }
-
-                SetSelected();
             }
         }
 
@@ -363,16 +365,16 @@ namespace PaintApp
 
                 if (_painter != null)
                 {
-                    _painter.SetStrokeDashArray(TransferStrokeDashArray(StrokeType));
+                    _painter.SetStrokeDashArray(BitmapToDashArray(StrokeType));
                 }
 
                 if (_selectedElement != null)
                 {
                     DoubleCollection newParam = new DoubleCollection(0);
 
-                    if (TransferStrokeDashArray(StrokeType) != null)
+                    if (BitmapToDashArray(StrokeType) != null)
                     {
-                        newParam = new DoubleCollection(TransferStrokeDashArray(StrokeType));
+                        newParam = new DoubleCollection(BitmapToDashArray(StrokeType));
                     }
 
                     if (_selectedElement.Element is Shape)
@@ -409,7 +411,7 @@ namespace PaintApp
             }
         }
 
-        private double[] TransferStrokeDashArray(BitmapImage image)
+        private double[] BitmapToDashArray(BitmapImage image)
         {
             Uri uri = image.UriSource;
             string fileName = System.IO.Path.GetFileName(uri.LocalPath);
@@ -425,6 +427,24 @@ namespace PaintApp
             else
             {
                 return [5, 2, 1, 2];
+            }
+        }
+
+        private void DashArrayToBitmap(DoubleCollection array)
+        {
+            double[] converted = array.Cast<double>().ToArray();
+
+            if (Enumerable.SequenceEqual(converted, new double[] { 5, 2 }))
+            {
+                StrokeTypeCb.SelectedItem = StrokeTypes[1];
+            }
+            else if (Enumerable.SequenceEqual(converted, new double[] { 5, 2, 1, 2 }))
+            {
+                StrokeTypeCb.SelectedItem = StrokeTypes[2];
+            }
+            else
+            {
+                StrokeTypeCb.SelectedItem = StrokeTypes[0];
             }
         }
 
@@ -520,6 +540,40 @@ namespace PaintApp
 
                 DrawingCanvas.Children.Remove(_selectionBounds);
                 BoundSelectedElement();
+
+                if (_selectedElement.Element is Shape)
+                {
+                    FillClr.Background = (_selectedElement.Element as Shape).Fill;
+                    StrokeClr.Background = (_selectedElement.Element as Shape).Stroke;
+                    StrokeWidthCb.SelectedItem = (_selectedElement.Element as Shape).StrokeThickness;
+
+                    DashArrayToBitmap((_selectedElement.Element as Shape).StrokeDashArray);
+
+                }
+                else if (_selectedElement.Element is Grid)
+                {
+                    foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                    {
+                        if (child is System.Windows.Shapes.Path)
+                        {
+                            System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
+
+                            FillClr.Background = path.Fill;
+                            StrokeClr.Background = path.Stroke;
+                            StrokeWidthCb.SelectedItem = path.StrokeThickness;
+
+                            DashArrayToBitmap(path.StrokeDashArray);
+                        }
+                        else if (child is Shape)
+                        {
+                            FillClr.Background = (child as Shape).Fill;
+                            StrokeClr.Background = (child as Shape).Stroke;
+                            StrokeWidthCb.SelectedItem = (child as Shape).StrokeThickness;
+
+                            DashArrayToBitmap((child as Shape).StrokeDashArray);
+                        }
+                    }
+                }
 
                 // activate the move tool by default
                 BtnMove.IsChecked = true;
