@@ -108,7 +108,7 @@ namespace MyArrow
 
             // create the arrowhead
             PathFigure arrowHeadPath = new PathFigure();
-            arrowHeadPath.StartPoint = new Point(wing1.X - minX, wing1.Y - minY);
+            arrowHeadPath.StartPoint = new Point(wing1.X - minX , wing1.Y - minY);
             arrowHeadPath.Segments.Add(new LineSegment(new Point(_end.X - minX, _end.Y - minY), true));
             arrowHeadPath.Segments.Add(new LineSegment(new Point(wing2.X - minX, wing2.Y - minY), true));
 

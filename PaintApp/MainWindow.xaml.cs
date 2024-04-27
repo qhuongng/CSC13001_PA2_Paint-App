@@ -1,10 +1,12 @@
 ﻿using Shapes;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -21,12 +23,77 @@ namespace PaintApp
 
         public ShapeElement(UIElement element, string name, IconKind icon)
         {
+            MemoryStream stream = new MemoryStream();
+            XamlWriter.Save(element, stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
+            clonedElement.RenderSize = element.RenderSize;
+
+            Canvas.SetTop(clonedElement,Canvas.GetTop(element));
+            Canvas.SetLeft(clonedElement,Canvas.GetLeft(element));
+
             Element = element;
             ElementName = name;
             ElementIcon = icon;
         }
-    }
+        public ShapeElementMemento createMemento()
+        {
+            return new ShapeElementMemento(Element,ElementName,ElementIcon);
+        }
+        public void restoreFromMemento(ShapeElementMemento memento)
+        {
+            MemoryStream stream = new MemoryStream();
+            XamlWriter.Save(memento.GetElement(), stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
+            this.Element = clonedElement;
+            this.ElementName = memento.GetElementName();
+            this.ElementIcon = memento.GetIcon();
 
+        }
+    }
+    public class ShapeElementMemento
+    {
+        private readonly UIElement element;
+        private readonly string elementName;
+        private readonly IconKind elementIcon;
+        public ShapeElementMemento(UIElement ele,string name,IconKind icon)
+        {
+            // Tạo bản sao của UIElement
+            MemoryStream stream = new MemoryStream();
+            XamlWriter.Save(ele, stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
+
+            this.element = clonedElement;
+            this.elementName = name;
+            this.elementIcon = icon;
+        }
+        public UIElement GetElement()
+        {
+            return element;
+        }
+        public string GetElementName()
+        {
+            return elementName;
+        }
+        public IconKind GetIcon()
+        {
+            return elementIcon;
+        }
+    }
+    public class CareTakerShape
+    {
+        public List<ShapeElementMemento> historyMemento = new List<ShapeElementMemento>();
+        public void addMemento(ShapeElementMemento memento) 
+        { 
+            historyMemento.Add(memento);
+        }
+        public ShapeElementMemento GetMemento(int index)
+        {
+            return historyMemento[index];
+        }
+    }
     public partial class MainWindow : Window
     {
         bool _isDrawing = false;
@@ -55,9 +122,18 @@ namespace PaintApp
 
         ShapeElement _selectedElement = null;
         ShapeElement _prevSelectedElement = null;
+        ShapeElement _latestElement = null;
 
         Rectangle _selectionBounds = null;
-        
+
+        public CareTakerShape careTaker;
+        public int currentPosition = -1;
+
+        public Dictionary<string, int> indexShape = new Dictionary<string, int>
+        {
+            {"Rectangle", 0},{"Ellipse", 0},{"Line", 0},{"Arrow", 0},
+            {"Heart", 0},{"Rounded Rectangle", 0},{"Star", 0},{"Triangle", 0}
+        };
 
         public MainWindow()
         {
@@ -73,7 +149,12 @@ namespace PaintApp
             StrokeTypes = new ObservableCollection<BitmapImage> { solid, dash, dash_dot };
             StrokeType = StrokeTypes[0];
 
-            ShapeList = new ObservableCollection<ShapeElement>();
+            ShapeList = new ObservableCollection<ShapeElement>(); 
+            careTaker = new CareTakerShape();
+            BtnRedo.IsEnabled = false;
+            iconRedo.Foreground = Brushes.Gray;
+            BtnUndo.IsEnabled = false;
+            iconUndo.Foreground = Brushes.Gray;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -135,6 +216,14 @@ namespace PaintApp
             {
                 _painter.SetShiftState(true);
             }
+            if(e.Key == Key.Z && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                UndoBtn_Click(null, null);
+            }
+            if (e.Key == Key.Y && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                RedoBtn_Click(null, null);
+            }
         }
 
         private void Canvas_KeyUp(object sender, KeyEventArgs e)
@@ -145,6 +234,96 @@ namespace PaintApp
             }
         }
 
+        private void UndoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            BtnRedo.IsEnabled = true;
+            iconRedo.Foreground = Brushes.White;
+            if (currentPosition <= 0)
+            {
+                BtnUndo.IsEnabled = false;
+                iconUndo.Foreground = Brushes.Gray;
+                ShapeList.Clear();
+                DrawingCanvas.Children.Clear();
+                currentPosition = -1;
+            }
+            if (currentPosition > 0)
+            {
+                string nameShapeBefore = careTaker.GetMemento(currentPosition - 1).GetElementName();
+                int countExists = 0;
+                for (int i = currentPosition - 1; i >= 0; i--)
+                {
+                    if (careTaker.GetMemento(i).GetElementName().Equals(careTaker.GetMemento(currentPosition).GetElementName())) countExists++;
+                }
+                if (countExists == 0) // nếu không thì xóa luôn hình đó
+                {
+                    string nameShape = careTaker.GetMemento(currentPosition).GetElementName();
+                    ShapeList.Remove(ShapeList.FirstOrDefault(x => x.ElementName.Equals(nameShape)));
+                }
+                else
+                {
+                    ShapeElement oldShape = ShapeList.FirstOrDefault(x => x.ElementName.Equals(nameShapeBefore));
+                    oldShape.restoreFromMemento(careTaker.GetMemento(currentPosition - 1));
+                }
+
+                currentPosition--;
+                DrawingCanvas.Children.Clear();
+
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+
+                
+            }
+        }
+
+        private void RedoBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentPosition < careTaker.historyMemento.Count - 1)
+            {
+                
+                //kiểm tra xem hình sau trong list có chưa, chưa có thì thêm vào
+                string shapeNameAfter = careTaker.GetMemento(currentPosition + 1).GetElementName();
+                int countExists = 0;
+                for (int i = currentPosition; i >= 0; i--)
+                {
+                    if (careTaker.GetMemento(i).GetElementName().Equals(shapeNameAfter)) countExists++;
+                }
+                if (countExists == 0)
+                {
+                    UIElement element = new UIElement();
+                    string name = "MyElement";
+                    IconKind icon = IconKind.Abacus;
+                    ShapeElement newShape = new ShapeElement(element,name,icon);
+                    newShape.restoreFromMemento(careTaker.GetMemento(currentPosition + 1));
+                    ShapeList.Add(newShape);
+                   
+                } else
+                {
+                    ShapeElement newShape  = ShapeList.FirstOrDefault(x => x.ElementName.Equals(shapeNameAfter));
+                    newShape.restoreFromMemento(careTaker.GetMemento(currentPosition + 1));
+                }
+                currentPosition++;
+                DrawingCanvas.Children.Clear();
+
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+
+                if (currentPosition == 0)
+                {
+                    BtnUndo.IsEnabled = true;
+                    iconUndo.Foreground = Brushes.White;
+                }
+                if (currentPosition == careTaker.historyMemento.Count - 1)
+                {
+                    BtnRedo.IsEnabled = false;
+                    iconRedo.Foreground = Brushes.Gray;
+                }
+            }
+            
+        }
         // change fill color on right-click
         private void ColorBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -180,14 +359,14 @@ namespace PaintApp
                         }
                     }
                 }
-
+                //_latestElement = new ShapeElement(_selectedElement.Element,_selectedElement.ElementName,_selectedElement.ElementIcon);
+                updateMemento();
                 DrawingCanvas.Children.Clear();
 
                 foreach (var shape in ShapeList)
                 {
                     DrawingCanvas.Children.Add(shape.Element);
                 }
-
                 SetSelected();
             }
         }
@@ -224,7 +403,8 @@ namespace PaintApp
                         }
                     }
                 }
-
+                //_latestElement = new ShapeElement(_selectedElement.Element, _selectedElement.ElementName, _selectedElement.ElementIcon);
+                updateMemento();
                 DrawingCanvas.Children.Clear();
 
                 foreach (var shape in ShapeList)
@@ -264,6 +444,7 @@ namespace PaintApp
         {
             if (_painter != null)
             {
+
                 _isDrawing = true;
                 _start = e.GetPosition(DrawingCanvas);
 
@@ -300,9 +481,27 @@ namespace PaintApp
                 _isDrawing = false;
 
                 IShape clone = (IShape)_painter.Clone();
-                ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon );
-
-                ShapeList.Add(newShape);
+                int index = indexShape[clone.Name];
+                //
+                if (index == 0)
+                {
+                    ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon);
+                    //_lastestElement = new ShapeElement(newShape.Element, newShape.ElementName, newShape.ElementIcon);
+                    //updateMemento();
+                    indexShape[clone.Name] = 1;
+                    ShapeList.Add(newShape);
+                } else
+                {
+                    ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
+                   // _lastestElement = new ShapeElement(newShape.Element, newShape.ElementName, newShape.ElementIcon);
+                    //updateMemento();
+                    indexShape[clone.Name] += 1;
+                    ShapeList.Add(newShape);
+                }
+                SelectionPane.SelectedItem = ShapeList.Last();
+                _selectedElement = ShapeList.Last();
+                updateMemento();
+                //SetSelected();
             }
         }
 
@@ -342,7 +541,8 @@ namespace PaintApp
                             }
                         }
                     }
-
+                    //_latestElement = new ShapeElement(_selectedElement.Element, _selectedElement.ElementName, _selectedElement.ElementIcon);
+                    updateMemento();
                     DrawingCanvas.Children.Clear();
 
                     foreach (var shape in ShapeList)
@@ -398,7 +598,8 @@ namespace PaintApp
                             }
                         }
                     }
-
+                    //_latestElement = new ShapeElement(_selectedElement.Element, _selectedElement.ElementName, _selectedElement.ElementIcon);
+                    updateMemento();
                     DrawingCanvas.Children.Clear();
 
                     foreach (var shape in ShapeList)
@@ -480,9 +681,10 @@ namespace PaintApp
         {
             _isDragging = false;
             _dragStart = new Point();
-
+            //_latestElement = new ShapeElement(_selectedElement.Element, _selectedElement.ElementName, _selectedElement.ElementIcon);
+            updateMemento();
             BoundSelectedElement();
-
+            
             (sender as UIElement).ReleaseMouseCapture();
         }
 
@@ -578,6 +780,28 @@ namespace PaintApp
                 // activate the move tool by default
                 BtnMove.IsChecked = true;
                 MoveBtn_Click(null, null);
+            }
+        }
+        private void updateMemento()
+        {
+            if (currentPosition < careTaker.historyMemento.Count - 1)
+            {
+                for (int i = currentPosition + 1; i < careTaker.historyMemento.Count; i++)
+                {
+                    careTaker.historyMemento.Remove(careTaker.GetMemento(i));
+                }
+            }
+            careTaker.addMemento(_selectedElement.createMemento());
+            currentPosition++;
+            if (BtnRedo.IsEnabled == true)
+            {
+                BtnRedo.IsEnabled = false;
+                iconRedo.Foreground = Brushes.Gray;
+            }
+            if (currentPosition == 0)
+            {
+                BtnUndo.IsEnabled = true;
+                iconUndo.Foreground = Brushes.White;
             }
         }
     }

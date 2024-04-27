@@ -33,14 +33,14 @@
                     </Menu>
                 </Border>
 
-                <Button x:Name="BtnUndo" Cursor="Hand" Margin="10,0,10,0"
+                <Button x:Name="BtnUndo" Cursor="Hand" Margin="10,0,10,0" Click="UndoBtn_Click"
                         Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
-                    <ic:PackIconMaterial Kind="Undo" Height="24" Width="24" Foreground="White"/>
+                    <ic:PackIconMaterial x:Name="iconUndo" Kind="Undo" Height="24" Width="24" Foreground="White"/>
                 </Button>
 
-                <Button x:Name="BtnRedo" Cursor="Hand" Margin="0,0,10,0"
+                <Button x:Name="BtnRedo" Cursor="Hand" Margin="0,0,10,0" Click="RedoBtn_Click"
                         Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
-                    <ic:PackIconMaterial Kind="Redo" Height="24" Width="24" Foreground="White"/>
+                    <ic:PackIconMaterial x:Name="iconRedo" Kind="Redo" Height="24" Width="24" Foreground="White"/>
                 </Button>
             </StackPanel>
         </Border>
