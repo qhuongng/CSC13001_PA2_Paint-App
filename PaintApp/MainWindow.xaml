@@ -94,22 +94,22 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <Button Grid.Row="0" Grid.Column="0" x:Name="BtnRotateClockwise"
+                        <Button Grid.Row="0" Grid.Column="0" x:Name="BtnRotateClockwise" Click="RotateRightBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="RotateRight" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
-                        <Button Grid.Row="0" Grid.Column="1" x:Name="BtnRotateCounter"
+                        <Button Grid.Row="0" Grid.Column="1" x:Name="BtnRotateCounter" Click="RotateLeftBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="RotateLeft" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
-                        <Button Grid.Row="1" Grid.Column="0" x:Name="BtnFlipHorizontal"
+                        <Button Grid.Row="1" Grid.Column="0" x:Name="BtnFlipHorizontal" Click="FlipHorizontalBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="FlipHorizontal" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
-                        <Button Grid.Row="1" Grid.Column="1" x:Name="BtnFlipVertical"
+                        <Button Grid.Row="1" Grid.Column="1" x:Name="BtnFlipVertical" Click="FlipVerticalBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="FlipVertical" Height="24" Width="24" Foreground="White"/>
                         </Button>

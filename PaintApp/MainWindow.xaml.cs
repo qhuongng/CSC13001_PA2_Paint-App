@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
@@ -128,6 +129,9 @@ namespace PaintApp
 
         public CareTakerShape careTaker;
         public int currentPosition = -1;
+        public int rotateCorner = 0;
+        public int flipHorizontal = 1;
+        public int flipVertical = 1;
 
         public Dictionary<string, int> indexShape = new Dictionary<string, int>
         {
@@ -324,6 +328,160 @@ namespace PaintApp
             }
             
         }
+        
+        private void RotateRightBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if(_selectedElement != null)
+            {
+                if(rotateCorner == 360) rotateCorner = 0;
+                rotateCorner += 90;
+                RotateTransform rightRotate = new RotateTransform();
+                rightRotate.Angle = rotateCorner;
+                ScaleTransform flip = new ScaleTransform();
+                flip.ScaleY = flipVertical;
+                flip.ScaleX = flipHorizontal;
+                double width = _selectedElement.Element.RenderSize.Width;
+                double height = _selectedElement.Element.RenderSize.Height;
+
+                // Tính toán tâm
+                double centerX = width / 2;
+                double centerY = height / 2;
+
+                // Thiết lập tâm quay
+                rightRotate.CenterX = centerX;
+                rightRotate.CenterY = centerY;
+                flip.CenterX = centerX;
+                flip.CenterY = centerY;
+                TransformGroup transformGroup = new TransformGroup();
+                transformGroup.Children.Add(rightRotate);
+                transformGroup.Children.Add(flip);
+                _selectedElement.Element.RenderTransform = transformGroup;
+
+                updateMemento();
+                DrawingCanvas.Children.Clear();
+
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+
+                SetSelected();
+            }
+        }
+
+        private void RotateLeftBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedElement != null)
+            {
+                if (rotateCorner == -360) rotateCorner = 0;
+                rotateCorner -= 90;
+                RotateTransform leftRotate = new RotateTransform();
+                leftRotate.Angle = rotateCorner;
+                ScaleTransform flip = new ScaleTransform();
+                flip.ScaleY = flipVertical;
+                flip.ScaleX = flipHorizontal;
+                double width = _selectedElement.Element.RenderSize.Width;
+                double height = _selectedElement.Element.RenderSize.Height;
+
+                // Tính toán tâm
+                double centerX = width / 2;
+                double centerY = height / 2;
+
+                // Thiết lập tâm quay
+                leftRotate.CenterX = centerX;
+                leftRotate.CenterY = centerY;
+                flip.CenterX = centerX;
+                flip.CenterY = centerY;
+                TransformGroup transformGroup = new TransformGroup();
+                transformGroup.Children.Add(leftRotate);
+                transformGroup.Children.Add(flip);
+                _selectedElement.Element.RenderTransform = transformGroup;
+                updateMemento();
+                DrawingCanvas.Children.Clear();
+
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+
+                SetSelected();
+            }
+        }
+
+        private void FlipHorizontalBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedElement != null)
+            {
+                if(flipHorizontal == 1) flipHorizontal = -1;
+                else flipHorizontal = 1;
+                ScaleTransform flip = new ScaleTransform();
+                flip.ScaleY = flipVertical;
+                flip.ScaleX = flipHorizontal;
+                RotateTransform rotate = new RotateTransform();
+                rotate.Angle = rotateCorner;
+                double width = _selectedElement.Element.RenderSize.Width;
+                double height = _selectedElement.Element.RenderSize.Height;
+
+                // Tính toán tâm của ellipse
+                double centerX = width / 2;
+                double centerY = height / 2;
+                flip.CenterX = centerX;
+                flip.CenterY = centerY;
+                rotate.CenterX  = centerX;
+                rotate.CenterY = centerY;
+                TransformGroup transformGroup = new TransformGroup();
+                transformGroup.Children.Add(rotate);
+                transformGroup.Children.Add(flip);
+                _selectedElement.Element.RenderTransform = transformGroup;
+                updateMemento();
+                DrawingCanvas.Children.Clear();
+
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+
+                SetSelected();
+            }
+        }
+
+        private void FlipVerticalBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedElement != null)
+            {
+                if (flipVertical == 1) flipVertical = -1;
+                else flipVertical = 1;
+                ScaleTransform flip = new ScaleTransform();
+                flip.ScaleX = flipHorizontal;
+                flip.ScaleY = flipVertical;
+                RotateTransform rotate = new RotateTransform();
+                rotate.Angle = rotateCorner;
+                double width = _selectedElement.Element.RenderSize.Width;
+                double height = _selectedElement.Element.RenderSize.Height;
+
+                // Tính toán tâm của ellipse
+                double centerX = width / 2;
+                double centerY = height / 2;
+                flip.CenterX = centerX;
+                flip.CenterY = centerY;
+                rotate.CenterX = centerX;
+                rotate.CenterY = centerY;
+                TransformGroup transformGroup = new TransformGroup();
+                transformGroup.Children.Add(rotate);
+                transformGroup.Children.Add(flip);
+                _selectedElement.Element.RenderTransform = transformGroup;
+                updateMemento();
+                DrawingCanvas.Children.Clear();
+
+                foreach (var shape in ShapeList)
+                {
+                    DrawingCanvas.Children.Add(shape.Element);
+                }
+
+                SetSelected();
+            }
+        }
+
         // change fill color on right-click
         private void ColorBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -486,22 +644,17 @@ namespace PaintApp
                 if (index == 0)
                 {
                     ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon);
-                    //_lastestElement = new ShapeElement(newShape.Element, newShape.ElementName, newShape.ElementIcon);
-                    //updateMemento();
                     indexShape[clone.Name] = 1;
                     ShapeList.Add(newShape);
                 } else
                 {
                     ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
-                   // _lastestElement = new ShapeElement(newShape.Element, newShape.ElementName, newShape.ElementIcon);
-                    //updateMemento();
                     indexShape[clone.Name] += 1;
                     ShapeList.Add(newShape);
                 }
                 SelectionPane.SelectedItem = ShapeList.Last();
                 _selectedElement = ShapeList.Last();
                 updateMemento();
-                //SetSelected();
             }
         }
 
@@ -782,6 +935,7 @@ namespace PaintApp
                 MoveBtn_Click(null, null);
             }
         }
+
         private void updateMemento()
         {
             if (currentPosition < careTaker.historyMemento.Count - 1)
