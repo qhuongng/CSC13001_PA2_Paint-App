@@ -1,5 +1,4 @@
 ﻿using Shapes;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
@@ -24,76 +23,94 @@ namespace PaintApp
         public ShapeElement(UIElement element, string name, IconKind icon)
         {
             MemoryStream stream = new MemoryStream();
+
             XamlWriter.Save(element, stream);
             stream.Seek(0, SeekOrigin.Begin);
+
             UIElement clonedElement = (UIElement)XamlReader.Load(stream);
             clonedElement.RenderSize = element.RenderSize;
 
-            Canvas.SetTop(clonedElement,Canvas.GetTop(element));
-            Canvas.SetLeft(clonedElement,Canvas.GetLeft(element));
+            Canvas.SetTop(clonedElement, Canvas.GetTop(element));
+            Canvas.SetLeft(clonedElement, Canvas.GetLeft(element));
 
             Element = element;
             ElementName = name;
             ElementIcon = icon;
         }
-        public ShapeElementMemento createMemento()
+
+        public ShapeElementMemento CreateMemento()
         {
-            return new ShapeElementMemento(Element,ElementName,ElementIcon);
+            return new ShapeElementMemento(Element, ElementName, ElementIcon);
         }
-        public void restoreFromMemento(ShapeElementMemento memento)
+
+        public void RestoreFromMemento(ShapeElementMemento memento)
         {
             MemoryStream stream = new MemoryStream();
+
             XamlWriter.Save(memento.GetElement(), stream);
             stream.Seek(0, SeekOrigin.Begin);
+
             UIElement clonedElement = (UIElement)XamlReader.Load(stream);
-            this.Element = clonedElement;
-            this.ElementName = memento.GetElementName();
-            this.ElementIcon = memento.GetIcon();
+
+            Element = clonedElement;
+            ElementName = memento.GetElementName();
+            ElementIcon = memento.GetIcon();
 
         }
     }
+
     public class ShapeElementMemento
     {
         private readonly UIElement element;
         private readonly string elementName;
         private readonly IconKind elementIcon;
-        public ShapeElementMemento(UIElement ele,string name,IconKind icon)
+
+        public ShapeElementMemento(UIElement ele, string name, IconKind icon)
         {
             // Tạo bản sao của UIElement
             MemoryStream stream = new MemoryStream();
+
             XamlWriter.Save(ele, stream);
             stream.Seek(0, SeekOrigin.Begin);
+
             UIElement clonedElement = (UIElement)XamlReader.Load(stream);
 
-            this.element = clonedElement;
-            this.elementName = name;
-            this.elementIcon = icon;
+            element = clonedElement;
+            elementName = name;
+            elementIcon = icon;
         }
+
         public UIElement GetElement()
         {
             return element;
         }
+
         public string GetElementName()
         {
             return elementName;
         }
+
         public IconKind GetIcon()
         {
             return elementIcon;
         }
     }
+
     public class CareTakerShape
     {
         public List<ShapeElementMemento> historyMemento = new List<ShapeElementMemento>();
-        public void addMemento(ShapeElementMemento memento) 
-        { 
+
+        public void AddMemento(ShapeElementMemento memento)
+        {
             historyMemento.Add(memento);
         }
+
         public ShapeElementMemento GetMemento(int index)
         {
             return historyMemento[index];
         }
     }
+
     public partial class MainWindow : Window
     {
         bool _isDrawing = false;
@@ -149,10 +166,12 @@ namespace PaintApp
             StrokeTypes = new ObservableCollection<BitmapImage> { solid, dash, dash_dot };
             StrokeType = StrokeTypes[0];
 
-            ShapeList = new ObservableCollection<ShapeElement>(); 
+            ShapeList = new ObservableCollection<ShapeElement>();
             careTaker = new CareTakerShape();
+
             BtnRedo.IsEnabled = false;
             iconRedo.Foreground = Brushes.Gray;
+
             BtnUndo.IsEnabled = false;
             iconUndo.Foreground = Brushes.Gray;
         }
@@ -212,11 +231,11 @@ namespace PaintApp
 
         private void Canvas_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+            if (_painter != null || e.Key == Key.LeftShift || e.Key == Key.RightShift)
             {
                 _painter.SetShiftState(true);
             }
-            if(e.Key == Key.Z && Keyboard.Modifiers == ModifierKeys.Control)
+            if (e.Key == Key.Z && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 UndoBtn_Click(null, null);
             }
@@ -228,7 +247,7 @@ namespace PaintApp
 
         private void Canvas_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+            if (_painter != null && e.Key == Key.LeftShift || e.Key == Key.RightShift)
             {
                 _painter.SetShiftState(false);
             }
@@ -262,7 +281,7 @@ namespace PaintApp
                 else
                 {
                     ShapeElement oldShape = ShapeList.FirstOrDefault(x => x.ElementName.Equals(nameShapeBefore));
-                    oldShape.restoreFromMemento(careTaker.GetMemento(currentPosition - 1));
+                    oldShape.RestoreFromMemento(careTaker.GetMemento(currentPosition - 1));
                 }
 
                 currentPosition--;
@@ -273,7 +292,7 @@ namespace PaintApp
                     DrawingCanvas.Children.Add(shape.Element);
                 }
 
-                
+
             }
         }
 
@@ -281,28 +300,34 @@ namespace PaintApp
         {
             if (currentPosition < careTaker.historyMemento.Count - 1)
             {
-                
-                //kiểm tra xem hình sau trong list có chưa, chưa có thì thêm vào
+                // kiểm tra xem hình sau trong list có chưa, chưa có thì thêm vào
                 string shapeNameAfter = careTaker.GetMemento(currentPosition + 1).GetElementName();
                 int countExists = 0;
+
                 for (int i = currentPosition; i >= 0; i--)
                 {
-                    if (careTaker.GetMemento(i).GetElementName().Equals(shapeNameAfter)) countExists++;
+                    if (careTaker.GetMemento(i).GetElementName().Equals(shapeNameAfter))
+                    {
+                        countExists++;
+                    }
                 }
+
                 if (countExists == 0)
                 {
                     UIElement element = new UIElement();
                     string name = "MyElement";
                     IconKind icon = IconKind.Abacus;
-                    ShapeElement newShape = new ShapeElement(element,name,icon);
-                    newShape.restoreFromMemento(careTaker.GetMemento(currentPosition + 1));
+                    ShapeElement newShape = new ShapeElement(element, name, icon);
+                    newShape.RestoreFromMemento(careTaker.GetMemento(currentPosition + 1));
                     ShapeList.Add(newShape);
-                   
-                } else
-                {
-                    ShapeElement newShape  = ShapeList.FirstOrDefault(x => x.ElementName.Equals(shapeNameAfter));
-                    newShape.restoreFromMemento(careTaker.GetMemento(currentPosition + 1));
+
                 }
+                else
+                {
+                    ShapeElement newShape = ShapeList.FirstOrDefault(x => x.ElementName.Equals(shapeNameAfter));
+                    newShape.RestoreFromMemento(careTaker.GetMemento(currentPosition + 1));
+                }
+
                 currentPosition++;
                 DrawingCanvas.Children.Clear();
 
@@ -322,8 +347,8 @@ namespace PaintApp
                     iconRedo.Foreground = Brushes.Gray;
                 }
             }
-            
         }
+
         // change fill color on right-click
         private void ColorBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -389,7 +414,8 @@ namespace PaintApp
                 {
                     (_selectedElement.Element as Shape).Stroke = StrokeClr.Background;
                 }
-                else if (_selectedElement.Element is Grid) {
+                else if (_selectedElement.Element is Grid)
+                {
                     foreach (UIElement child in (_selectedElement.Element as Grid).Children)
                     {
                         if (child is System.Windows.Shapes.Path)
@@ -403,6 +429,7 @@ namespace PaintApp
                         }
                     }
                 }
+
                 //_latestElement = new ShapeElement(_selectedElement.Element, _selectedElement.ElementName, _selectedElement.ElementIcon);
                 updateMemento();
                 DrawingCanvas.Children.Clear();
@@ -490,10 +517,11 @@ namespace PaintApp
                     //updateMemento();
                     indexShape[clone.Name] = 1;
                     ShapeList.Add(newShape);
-                } else
+                }
+                else
                 {
                     ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
-                   // _lastestElement = new ShapeElement(newShape.Element, newShape.ElementName, newShape.ElementIcon);
+                    // _lastestElement = new ShapeElement(newShape.Element, newShape.ElementName, newShape.ElementIcon);
                     //updateMemento();
                     indexShape[clone.Name] += 1;
                     ShapeList.Add(newShape);
@@ -511,6 +539,7 @@ namespace PaintApp
 
             if (strokeWidthCb.SelectedItem != null)
             {
+                double oldStrokeWidth = StrokeWidth;
                 StrokeWidth = (double)strokeWidthCb.SelectedItem;
 
                 if (_painter != null)
@@ -526,14 +555,33 @@ namespace PaintApp
                     }
                     else if (_selectedElement.Element is Grid)
                     {
+                        Grid element = _selectedElement.Element as Grid;
+
                         // custom shapes consists of Path(s) wrapped inside a Grid
                         // find all Paths that are child of the grid and modify their colors
-                        foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                        foreach (UIElement child in element.Children)
                         {
                             if (child is System.Windows.Shapes.Path)
                             {
                                 System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
+
                                 path.StrokeThickness = StrokeWidth;
+
+                                double oldWidth = element.ActualWidth;
+                                double oldHeight = element.ActualHeight;
+
+                                double minX = Canvas.GetLeft(element) + (StrokeWidth - oldStrokeWidth) / 2;
+                                double minY = Canvas.GetTop(element) + (StrokeWidth - oldStrokeWidth) / 2;
+
+                                double boundingWidth = oldWidth + (StrokeWidth - oldStrokeWidth);
+                                double boundingHeight = oldHeight + (StrokeWidth - oldStrokeWidth);
+
+                                // Update container size and position
+                                element.Width = boundingWidth;
+                                element.Height = boundingHeight;
+
+                                Canvas.SetLeft(element, minX);
+                                Canvas.SetTop(element, minY);
                             }
                             else if (child is Shape)
                             {
@@ -541,6 +589,7 @@ namespace PaintApp
                             }
                         }
                     }
+
                     //_latestElement = new ShapeElement(_selectedElement.Element, _selectedElement.ElementName, _selectedElement.ElementIcon);
                     updateMemento();
                     DrawingCanvas.Children.Clear();
@@ -684,7 +733,7 @@ namespace PaintApp
             //_latestElement = new ShapeElement(_selectedElement.Element, _selectedElement.ElementName, _selectedElement.ElementIcon);
             updateMemento();
             BoundSelectedElement();
-            
+
             (sender as UIElement).ReleaseMouseCapture();
         }
 
@@ -791,7 +840,7 @@ namespace PaintApp
                     careTaker.historyMemento.Remove(careTaker.GetMemento(i));
                 }
             }
-            careTaker.addMemento(_selectedElement.createMemento());
+            careTaker.AddMemento(_selectedElement.CreateMemento());
             currentPosition++;
             if (BtnRedo.IsEnabled == true)
             {

@@ -267,7 +267,7 @@
             <DockPanel Grid.Column="1" LastChildFill="True">
                 <Border DockPanel.Dock="Bottom" Height="50"
                         BorderBrush="#9D9D9D" BorderThickness="0,1,0,0">
-                    <Grid Margin="10">
+                    <Grid Margin="5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
                             <ColumnDefinition />
