@@ -9,12 +9,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Material.Icons.WPF" Version="2.1.9" />
+    <None Remove="lines\dash.png" />
+    <None Remove="lines\dash_dot.png" />
+    <None Remove="lines\solid.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
 	<ProjectReference Include="..\IShape\IShape.csproj" />
+	<ProjectReference Include="..\MyArrow\MyArrow.csproj" />
 	<ProjectReference Include="..\MyEllipse\MyEllipse.csproj" />
+	<ProjectReference Include="..\MyHeart\MyHeart.csproj" />
 	<ProjectReference Include="..\MyLine\MyLine.csproj" />
 	<ProjectReference Include="..\MyRect\MyRect.csproj" />
+	<ProjectReference Include="..\MyRoundedRect\MyRoundedRect.csproj" />
+	<ProjectReference Include="..\MyStar\MyStar.csproj" />
+	<ProjectReference Include="..\MyTriangle\MyTriangle.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="lines\dash.png" />
+    <Resource Include="lines\dash_dot.png" />
+    <Resource Include="lines\solid.png" />
   </ItemGroup>
 
 </Project>

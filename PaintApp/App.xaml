@@ -33,6 +33,53 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <Style x:Key="ColorButtonStyle" TargetType="{x:Type Button}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border x:Name="BtnBorder" Background="{TemplateBinding Background}"
+                                    BorderBrush="#9D9D9D" BorderThickness="1" CornerRadius="20">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter TargetName="BtnBorder" Property="BorderBrush" Value="LightGray" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="IconRadioButtonStyle" TargetType="{x:Type RadioButton}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type RadioButton}">
+                            <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="2">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter TargetName="BtnBorder" Property="Background" Value="DimGray" />
+                                </Trigger>
+
+                                <Trigger Property="IsPressed" Value="true">
+                                    <Setter TargetName="BtnBorder" Property="Background" Value="LightGray" />
+                                </Trigger>
+
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background" TargetName="BtnBorder" Value="DodgerBlue"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

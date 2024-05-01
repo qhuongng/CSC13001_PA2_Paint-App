@@ -1,8 +1,9 @@
 ﻿using Shapes;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows;
 using System.Windows.Shapes;
+using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
 namespace MyRect
 {
@@ -12,10 +13,19 @@ namespace MyRect
         private Point _bottomRight;
 
         private bool _isShiftPressed = false;
-        private SolidColorBrush _stroke;
-        private double _strokeWidth;
 
+        private SolidColorBrush _stroke;
+        private SolidColorBrush _fill;
+        private double _strokeWidth;
+        private double[]? _strokeDashArray;
+
+        public IconKind Icon => IconKind.SquareOutline;
         public string Name => "Rectangle";
+
+        public double Top => _topLeft.Y;
+        public double Left => _topLeft.X;
+        public double Bottom => _bottomRight.Y;
+        public double Right => _bottomRight.X;
 
         public void AddStart(Point point)
         {
@@ -32,14 +42,23 @@ namespace MyRect
             _isShiftPressed = shiftState;
         }
 
-        public void SetStrokeColor(Color color)
+        public void SetStrokeColor(SolidColorBrush color)
         {
-            _stroke = new SolidColorBrush(color);
+            _stroke = color;
+        }
+
+        public void SetFillColor(SolidColorBrush color)
+        {
+            _fill = color;
         }
 
         public void SetStrokeWidth(double width)
         {
             _strokeWidth = width;
+        }
+        public void SetStrokeDashArray(double[] strokeDashArray)
+        {
+            _strokeDashArray = strokeDashArray;
         }
 
         public object Clone()
@@ -55,9 +74,16 @@ namespace MyRect
 
             Rectangle e = new Rectangle()
             {
+                Fill = _fill,
                 Stroke = _stroke,
-                StrokeThickness = _strokeWidth
+                StrokeThickness = _strokeWidth,
+                StrokeLineJoin = PenLineJoin.Round
             };
+
+            if (_strokeDashArray != null)
+            {
+                e.StrokeDashArray = new DoubleCollection(_strokeDashArray);
+            }
 
             if (_isShiftPressed)
             {

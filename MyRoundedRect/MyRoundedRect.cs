@@ -5,9 +5,9 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
-namespace MyEllipse
+namespace MyRoundedRect
 {
-    public class MyEllipse : IShape
+    public class MyRoundedRect : IShape
     {
         private Point _topLeft;
         private Point _bottomRight;
@@ -19,9 +19,8 @@ namespace MyEllipse
         private double _strokeWidth;
         private double[]? _strokeDashArray;
 
-
-        public IconKind Icon => IconKind.EllipseOutline;
-        public string Name => "Ellipse";
+        public IconKind Icon => IconKind.SquareRoundedOutline;
+        public string Name => "Rounded Rectangle";
 
         public double Top => _topLeft.Y;
         public double Left => _topLeft.X;
@@ -73,55 +72,59 @@ namespace MyEllipse
             double height = Math.Abs(_bottomRight.Y - _topLeft.Y);
             double circleDiameter = Math.Min(width, height);
 
-            Ellipse e = new Ellipse()
+            Rectangle r = new Rectangle()
             {
                 Fill = _fill,
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth,
+                StrokeLineJoin = PenLineJoin.Round,
+                RadiusX = 12,
+                RadiusY = 12
             };
+
             if (_strokeDashArray != null)
             {
-                e.StrokeDashArray = new DoubleCollection(_strokeDashArray);
+                r.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
 
             if (_isShiftPressed)
             {
-                // draw a circle
-                e.Width = circleDiameter;
-                e.Height = circleDiameter;
+                // draw a square
+                r.Width = circleDiameter;
+                r.Height = circleDiameter;
             }
             else
             {
-                // draw an ellipse
-                e.Width = width;
-                e.Height = height;
+                // draw a rectangle
+                r.Width = width;
+                r.Height = height;
             }
 
             if (_bottomRight.X >= _topLeft.X)
             {
-                e.SetValue(Canvas.LeftProperty, _topLeft.X);
+                r.SetValue(Canvas.LeftProperty, _topLeft.X);
             }
             else
             {
                 if (_isShiftPressed)
-                    e.SetValue(Canvas.LeftProperty, _topLeft.X - circleDiameter);
+                    r.SetValue(Canvas.LeftProperty, _topLeft.X - circleDiameter);
                 else
-                    e.SetValue(Canvas.LeftProperty, _topLeft.X - width);
+                    r.SetValue(Canvas.LeftProperty, _topLeft.X - width);
             }
 
             if (_bottomRight.Y >= _topLeft.Y)
             {
-                e.SetValue(Canvas.TopProperty, _topLeft.Y);
+                r.SetValue(Canvas.TopProperty, _topLeft.Y);
             }
             else
             {
                 if (_isShiftPressed)
-                    e.SetValue(Canvas.TopProperty, _topLeft.Y - circleDiameter);
+                    r.SetValue(Canvas.TopProperty, _topLeft.Y - circleDiameter);
                 else
-                    e.SetValue(Canvas.TopProperty, _topLeft.Y - height);
+                    r.SetValue(Canvas.TopProperty, _topLeft.Y - height);
             }
 
-            return e;
+            return r;
         }
     }
 }

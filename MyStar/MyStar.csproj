@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-	<UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
+	  <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.11.0" />
+    <ProjectReference Include="..\IShape\IShape.csproj" />
   </ItemGroup>
 
 </Project>
