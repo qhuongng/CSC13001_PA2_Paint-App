@@ -26,13 +26,13 @@
                             <MenuItem Header="_Save" InputGestureText="Ctrl+S" />
                             <MenuItem Header="_Save as..." InputGestureText="Ctrl+Shift+X" />
                             <Separator />
-                            <MenuItem Header="_Quit" InputGestureText="Alt+F4" />
+                            <MenuItem Header="_Quit" InputGestureText="Alt+F4" Click="Quit_Click"/>
                         </MenuItem>
 
                         <MenuItem Header="_Edit" Margin="0,0,10,0">
-                            <MenuItem Header="_Copy" InputGestureText="Ctrl+C" />
-                            <MenuItem Header="_Cut" InputGestureText="Ctrl+X" />
-                            <MenuItem Header="_Paste" InputGestureText="Ctrl+V" />
+                            <MenuItem Header="_Copy" InputGestureText="Ctrl+C" Click="Copy_Click"/>
+                            <MenuItem Header="_Cut" InputGestureText="Ctrl+X" Click="Cut_Click"/>
+                            <MenuItem Header="_Paste" InputGestureText="Ctrl+V" Click="Paste_Click"/>
                         </MenuItem>
                     </Menu>
                 </Border>
@@ -83,22 +83,22 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <Button Grid.Row="0" Grid.Column="0" x:Name="BtnRotateClockwise"
+                        <Button Grid.Row="0" Grid.Column="0" x:Name="BtnRotateClockwise" Click="RotateRightBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="RotateRight" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
-                        <Button Grid.Row="0" Grid.Column="1" x:Name="BtnRotateCounter"
+                        <Button Grid.Row="0" Grid.Column="1" x:Name="BtnRotateCounter" Click="RotateLeftBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="RotateLeft" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
-                        <Button Grid.Row="1" Grid.Column="0" x:Name="BtnFlipHorizontal"
+                        <Button Grid.Row="1" Grid.Column="0" x:Name="BtnFlipHorizontal" Click="FlipHorizontalBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="FlipHorizontal" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
-                        <Button Grid.Row="1" Grid.Column="1" x:Name="BtnFlipVertical"
+                        <Button Grid.Row="1" Grid.Column="1" x:Name="BtnFlipVertical" Click="FlipVerticalBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="FlipVertical" Height="24" Width="24" Foreground="White"/>
                         </Button>
