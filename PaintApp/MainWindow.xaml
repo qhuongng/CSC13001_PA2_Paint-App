@@ -10,6 +10,10 @@
         ui:WindowHelper.UseModernWindowStyle="True"
         Title="Paint App" Height="810" Width="1440" Loaded="Window_Loaded">
 
+    <Window.Resources>
+        <ObjectDataProvider x:Key="SystemFontsDataProvider" ObjectType="{x:Type Fonts}" MethodName="GetSystemFontFamilies"/>
+    </Window.Resources>
+
     <DockPanel LastChildFill="True">
         <Border DockPanel.Dock="Top" BorderBrush="#9D9D9D" BorderThickness="0,0,0,1">
             <StackPanel Orientation="Horizontal">
@@ -48,36 +52,21 @@
         <Border DockPanel.Dock="Top" BorderBrush="#9D9D9D"
                 BorderThickness="0,0,0,1" Height="100">
             <DockPanel LastChildFill="True">
-                <Border DockPanel.Dock="Left" BorderBrush="#9D9D9D" BorderThickness="0,0,1,0" Width="120">
+                <Border DockPanel.Dock="Left" BorderBrush="#9D9D9D" BorderThickness="0,0,1,0" Width="60">
                     <Grid x:Name="FirstBtnGrp" Margin="5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <RadioButton Grid.Column="0" Grid.Row="0" x:Name="BtnSelect" GroupName="CtrlBtn" Click="MoveBtn_Click"
-                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
-                            <ic:PackIconMaterial Kind="Select" Height="24" Width="24" Foreground="White"/>
-                        </RadioButton>
-
-                        <RadioButton Grid.Column="1" Grid.Row="0" x:Name="BtnMove" GroupName="CtrlBtn" Click="MoveBtn_Click"
+                        <RadioButton Grid.Row="0" x:Name="BtnMove" GroupName="CtrlBtn" Click="MoveBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
                             <ic:PackIconMaterial Kind="CursorMove" Height="24" Width="24" Foreground="White"/>
                         </RadioButton>
 
-                        <RadioButton Grid.Column="0" Grid.Row="1" x:Name="BtnErase" GroupName="CtrlBtn" Click="MoveBtn_Click"
+                        <RadioButton Grid.Row="1" x:Name="BtnText" GroupName="CtrlBtn" Click="TextBtn_Click" Unchecked="TextBtn_Unchecked"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
-                            <ic:PackIconMaterial Kind="Eraser" Height="24" Width="24" Foreground="White"/>
-                        </RadioButton>
-
-                        <RadioButton Grid.Column="1" Grid.Row="1" x:Name="BtnText" GroupName="CtrlBtn" Click="MoveBtn_Click"
-                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
-                            <ic:PackIconMaterial Kind="FormatTitle" Height="24" Width="24" Foreground="White"/>
+                            <ic:PackIconMaterial x:Name="iconText" Kind="FormatTitle" Height="24" Width="24" Foreground="Gray" IsEnabled="False"/>
                         </RadioButton>
                     </Grid>
                 </Border>
@@ -88,7 +77,7 @@
                             <ColumnDefinition />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        
+
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
@@ -140,11 +129,11 @@
                         </Grid.RowDefinitions>
 
                         <ComboBox x:Name="StrokeWidthCb" Grid.Row="0" HorizontalAlignment="Stretch" SelectionChanged="StrokeWidthCb_SelectionChanged"
-                                  ItemsSource="{Binding StrokeWidths}" Background="#343434" Foreground="White"
+                                  ItemsSource="{Binding StrokeWidths}" Background="#343434" Foreground="White" VerticalAlignment="Center"
                                   SelectedItem="{Binding StrokeWidth, Mode=TwoWay}" />
 
                         <ComboBox x:Name="StrokeTypeCb" Grid.Row="1" HorizontalAlignment="Stretch" SelectionChanged="StrokeTypeCb_SelectionChanged"
-                                  ItemsSource="{Binding StrokeTypes}" Background="#343434" Foreground="White"
+                                  ItemsSource="{Binding StrokeTypes}" Background="#343434" Foreground="White" VerticalAlignment="Center"
                                   SelectedItem="{Binding StrokeType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -176,7 +165,7 @@
                     </Grid>
                 </Border>
 
-                <Grid x:Name="ColorsBtnGrp" Margin="5">
+                <Grid DockPanel.Dock="Left" x:Name="ColorsBtnGrp" Margin="5">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
@@ -197,19 +186,19 @@
 
                         <Button Style="{StaticResource ColorButtonStyle}" MouseDown="ColorBtn_MouseDown"
                                 Background="#FF8A00"  Height="28" Width="28" Margin="0,0,20,0" Click="ColorBtn_Click" />
-                        
+
                         <Button Style="{StaticResource ColorButtonStyle}" MouseDown="ColorBtn_MouseDown"
                                 Background="#FFFF00"  Height="28" Width="28" Margin="0,0,20,0" Click="ColorBtn_Click" />
-                        
+
                         <Button Style="{StaticResource ColorButtonStyle}" MouseDown="ColorBtn_MouseDown"
                                 Background="#00A807"  Height="28" Width="28" Margin="0,0,20,0" Click="ColorBtn_Click" />
-                        
+
                         <Button Style="{StaticResource ColorButtonStyle}" MouseDown="ColorBtn_MouseDown"
                                 Background="#0085FF"  Height="28" Width="28" Margin="0,0,20,0" Click="ColorBtn_Click" />
-                        
+
                         <Button Style="{StaticResource ColorButtonStyle}" MouseDown="ColorBtn_MouseDown"
                                 Background="#0000FF"  Height="28" Width="28" Margin="0,0,20,0" Click="ColorBtn_Click" />
-                        
+
                         <Button Style="{StaticResource ColorButtonStyle}" MouseDown="ColorBtn_MouseDown"
                                 Background="#7900D9"  Height="28" Width="28" Margin="0,0,20,0" Click="ColorBtn_Click" />
                     </StackPanel>
@@ -246,6 +235,33 @@
                                 Background="#F3C2FF"  Height="28" Width="28" Margin="0,0,20,0" Click="ColorBtn_Click" />
                     </StackPanel>
                 </Grid>
+
+                <Border>
+                    <Button x:Name="BtnTransparent" HorizontalAlignment="Left" MouseDown="TransparentBtn_MouseDown"
+                            Height="32" Width="32" Click="TransparentBtn_Click">
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Ellipse Name="BtnFill" Fill="{TemplateBinding Background}" />
+
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="true">
+                                        <Setter TargetName="BtnFill" Property="Stroke" Value="LightGray" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="Button.Background">
+                                    <Setter.Value>
+                                        <ImageBrush ImageSource="pack://application:,,,/img/color_none.png" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Border>
             </DockPanel>
         </Border>
 
@@ -255,18 +271,82 @@
                 <ColumnDefinition Width="280" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#9D9D9D">
-                <Grid Margin="120,60,120,60">
-                    <Canvas x:Name="DrawingCanvas" Background="White" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="141*"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Background="#9D9D9D" Grid.ColumnSpan="2">
+                    <Grid Margin="120,60,120,60">
+                        <Canvas x:Name="DrawingCanvas" Background="White" />
 
-                    <Border x:Name="CanvasHelper" MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
-                            MouseMove="Canvas_MouseMove" Background="Transparent" />
-                </Grid>
-            </Border>
+                        <Border x:Name="CanvasHelper" MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+                                MouseMove="Canvas_MouseMove" Background="Transparent" />
+                    </Grid>
+                </Border>
+
+                <Border x:Name="TextPanel" Background="#343434" Height="58" VerticalAlignment="Top"
+                        BorderBrush="#9D9D9D" BorderThickness="0,0,0,1" Visibility="Collapsed" Grid.ColumnSpan="2">
+                    <DockPanel LastChildFill="True">
+                        <Border DockPanel.Dock="Left" BorderBrush="#9D9D9D" BorderThickness="0,0,1,0" Padding="0,12,0,12">
+                            <ComboBox x:Name="FontCb" Margin="10,0,10,0" Width="217" SelectionChanged="FontCb_SelectionChanged" />
+                        </Border>
+
+                        <Border DockPanel.Dock="Left" BorderBrush="#9D9D9D" BorderThickness="0,0,1,0" Width="120" Padding="0,12,0,12">
+                            <ComboBox x:Name="FontSizeCb" HorizontalAlignment="Stretch" Margin="10,0,10,0" SelectionChanged="FontSizeCb_SelectionChanged"
+                                      ItemsSource="{Binding FontSizes}" Background="#343434" Foreground="White" />
+                        </Border>
+
+                        <Border DockPanel.Dock="Left" BorderBrush="#9D9D9D" BorderThickness="0,0,1,0">
+                            <StackPanel Orientation="Horizontal" Margin="18,0,18,0">
+                                <ToggleButton x:Name="BtnBold" Margin="0,0,18,0" Click="BoldBtn_Click"
+                                              Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconToggleButtonStyle}">
+                                    <ic:PackIconMaterial Kind="FormatBold" Height="24" Width="24" Foreground="White"/>
+                                </ToggleButton>
+
+                                <ToggleButton x:Name="BtnItalic" Margin="0,0,18,0" Click="ItalicBtn_Click"
+                                              Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconToggleButtonStyle}">
+                                    <ic:PackIconMaterial Kind="FormatItalic" Height="24" Width="24" Foreground="White"/>
+                                </ToggleButton>
+
+                                <ToggleButton x:Name="BtnUnderline" Click="UnderlineBtn_Click"
+                                              Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconToggleButtonStyle}">
+                                    <ic:PackIconMaterial Kind="FormatUnderline" Height="24" Width="24" Foreground="White"/>
+                                </ToggleButton>
+                            </StackPanel>
+                        </Border>
+
+                        <Border DockPanel.Dock="Left" BorderBrush="#9D9D9D" BorderThickness="0,0,1,0">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="BtnLeft" Margin="18,10,18,10" IsChecked="True"
+                                              Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
+                                    <ic:PackIconMaterial Kind="FormatAlignLeft" Height="24" Width="24" Foreground="White"/>
+                                </RadioButton>
+
+                                <RadioButton x:Name="BtnCenter" Margin="0,10,18,10"
+                                              Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
+                                    <ic:PackIconMaterial Kind="FormatAlignCenter" Height="24" Width="24" Foreground="White"/>
+                                </RadioButton>
+
+                                <RadioButton x:Name="BtnRight" Margin="0,10,18,10"
+                                              Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
+                                    <ic:PackIconMaterial Kind="FormatUnderline" Height="24" Width="24" Foreground="White"/>
+                                </RadioButton>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#9D9D9D" BorderThickness="0,0,1,0" Padding="10,12,10,12">
+                            <TextBox x:Name="ElementTb" TextChanged="ElementTb_TextChanged" LostFocus="ElementTb_LostFocus" />
+                        </Border>
+
+                    </DockPanel>
+                </Border>
+            </Grid>
+
 
             <DockPanel Grid.Column="1" LastChildFill="True">
                 <Border DockPanel.Dock="Bottom" Height="50"
-                        BorderBrush="#9D9D9D" BorderThickness="0,1,0,0">
+                BorderBrush="#9D9D9D" BorderThickness="0,1,0,0">
                     <Grid Margin="5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
@@ -276,29 +356,29 @@
                         </Grid.ColumnDefinitions>
 
                         <Button Grid.Column="0" x:Name="BtnDelLayer"
-                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                        Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="DeleteOutline" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
                         <Button Grid.Column="1" x:Name="BtnLayerUp"
-                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                        Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="ArrowUp" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
                         <Button Grid.Column="2" x:Name="BtnLayerDown"
-                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                        Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="ArrowDown" Height="24" Width="24" Foreground="White"/>
                         </Button>
 
                         <Button Grid.Column="3" x:Name="BtnNewLayer"
-                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                        Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
                             <ic:PackIconMaterial Kind="LayersOutline" Height="24" Width="24" Foreground="White"/>
                         </Button>
                     </Grid>
                 </Border>
 
                 <Border DockPanel.Dock="Top" Height="240"
-                        BorderBrush="#9D9D9D" BorderThickness="0,0,0,1">
+                BorderBrush="#9D9D9D" BorderThickness="0,0,0,1">
                     <DockPanel LastChildFill="True">
                         <TextBlock DockPanel.Dock="Top" Text="Selection Pane" Margin="20,10,20,10" Foreground="White" FontSize="20"/>
 
@@ -331,6 +411,5 @@
                 </DockPanel>
             </DockPanel>
         </Grid>
-
     </DockPanel>
 </Window>
