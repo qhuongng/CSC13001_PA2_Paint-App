@@ -22,13 +22,13 @@
                             <MenuItem Header="_Save" InputGestureText="Ctrl+S" />
                             <MenuItem Header="_Save as..." InputGestureText="Ctrl+Shift+X" />
                             <Separator />
-                            <MenuItem Header="_Quit" InputGestureText="Alt+F4" />
+                            <MenuItem Header="_Quit" InputGestureText="Alt+F4" Click="Quit_Click"/>
                         </MenuItem>
 
                         <MenuItem Header="_Edit" Margin="0,0,10,0">
-                            <MenuItem Header="_Copy" InputGestureText="Ctrl+C" />
-                            <MenuItem Header="_Cut" InputGestureText="Ctrl+X" />
-                            <MenuItem Header="_Paste" InputGestureText="Ctrl+V" />
+                            <MenuItem Header="_Copy" InputGestureText="Ctrl+C" Click="Copy_Click"/>
+                            <MenuItem Header="_Cut" InputGestureText="Ctrl+X" Click="Cut_Click"/>
+                            <MenuItem Header="_Paste" InputGestureText="Ctrl+V" Click="Paste_Click"/>
                         </MenuItem>
                     </Menu>
                 </Border>
