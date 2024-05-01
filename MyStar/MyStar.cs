@@ -145,12 +145,23 @@ namespace MyStar
             double boundingWidth = maxX - minX;
             double boundingHeight = maxY - minY;
 
+            TextBlock tb = new TextBlock();
+
+            tb.Width = width / 3;
+            tb.Height = height / 3;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.FontSize = 16;
+            tb.Foreground = Brushes.Black;
+            tb.HorizontalAlignment = HorizontalAlignment.Center;
+            tb.VerticalAlignment = VerticalAlignment.Center;
+
             // create a container Grid to hold the star
             Grid container = new Grid();
 
             container.Width = boundingWidth;
             container.Height = boundingHeight;
             container.Children.Add(starPath);
+            container.Children.Add(tb);
 
             // Set the position of the containerGrid
             Canvas.SetLeft(container, minX);

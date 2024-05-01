@@ -139,11 +139,22 @@ namespace MyTriangle
                 triangle.Points.Add(new Point(i.X - minX, i.Y - minY));
             }
 
+            TextBlock tb = new TextBlock();
+
+            tb.Width = width / 2;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.FontSize = 16;
+            tb.Foreground = Brushes.Black;
+            tb.HorizontalAlignment = HorizontalAlignment.Center;
+            tb.VerticalAlignment = VerticalAlignment.Top;
+            tb.Margin = new Thickness(0, height / 2, 0, height / 7);
+
             Grid container = new Grid();
 
             container.Width = boundingWidth;
             container.Height = boundingHeight;
             container.Children.Add(triangle);
+            container.Children.Add(tb);
 
             // set the position of the containerGrid
             Canvas.SetLeft(container, minX);

@@ -115,12 +115,24 @@ namespace MyArrow
             arrowPath.StrokeDashArray = new DoubleCollection(_strokeDashArray ?? new double[] { });
             arrowPath.Data = arrowGeometry;
 
+            TextBlock tb = new TextBlock();
+
+            tb.Width = width / 1.5;
+            tb.Height = height / 3;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.FontSize = 16;
+            tb.Foreground = Brushes.Black;
+            tb.HorizontalAlignment = HorizontalAlignment.Left;
+            tb.VerticalAlignment = VerticalAlignment.Center;
+            tb.Margin = new Thickness(width / 9, 0, 0, 0);
+
             // create a container Grid to hold the arrow
             Grid container = new Grid();
 
             container.Width = maxX - minX;
             container.Height = maxY - minY;
             container.Children.Add(arrowPath);
+            container.Children.Add(tb);
 
             Canvas.SetLeft(container, minX);
             Canvas.SetTop(container, minY);

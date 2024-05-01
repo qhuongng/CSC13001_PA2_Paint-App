@@ -68,9 +68,26 @@ namespace MyRoundedRect
 
         public UIElement Convert()
         {
-            double width = Math.Abs(_bottomRight.X - _topLeft.X);
-            double height = Math.Abs(_bottomRight.Y - _topLeft.Y);
-            double circleDiameter = Math.Min(width, height);
+            Point start = new Point(Math.Min(_topLeft.X, _bottomRight.X), Math.Min(_topLeft.Y, _bottomRight.Y));
+            Point end = new Point(Math.Max(_topLeft.X, _bottomRight.X), Math.Max(_topLeft.Y, _bottomRight.Y));
+
+            double width = Math.Abs(end.X - start.X);
+            double height = Math.Abs(end.Y - start.Y);
+
+            Point center = new Point(start.X + width / 2, start.Y + height / 2);
+
+            double minX = center.X - width / 2 - _strokeWidth / 2;
+            double maxX = center.X + width / 2 + _strokeWidth / 2;
+            double minY = center.Y - height / 2 - _strokeWidth / 2;
+            double maxY = center.Y + height / 2 + _strokeWidth / 2;
+
+            double shiftWidth = Math.Min(width, height);
+
+            if (_isShiftPressed)
+            {
+                width = shiftWidth;
+                height = shiftWidth;
+            }
 
             Rectangle r = new Rectangle()
             {
@@ -79,7 +96,9 @@ namespace MyRoundedRect
                 StrokeThickness = _strokeWidth,
                 StrokeLineJoin = PenLineJoin.Round,
                 RadiusX = 12,
-                RadiusY = 12
+                RadiusY = 12,
+                Width = width,
+                Height = height
             };
 
             if (_strokeDashArray != null)
@@ -87,44 +106,28 @@ namespace MyRoundedRect
                 r.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
 
-            if (_isShiftPressed)
-            {
-                // draw a square
-                r.Width = circleDiameter;
-                r.Height = circleDiameter;
-            }
-            else
-            {
-                // draw a rectangle
-                r.Width = width;
-                r.Height = height;
-            }
+            TextBlock tb = new TextBlock();
 
-            if (_bottomRight.X >= _topLeft.X)
-            {
-                r.SetValue(Canvas.LeftProperty, _topLeft.X);
-            }
-            else
-            {
-                if (_isShiftPressed)
-                    r.SetValue(Canvas.LeftProperty, _topLeft.X - circleDiameter);
-                else
-                    r.SetValue(Canvas.LeftProperty, _topLeft.X - width);
-            }
+            tb.Width = width * 7 / 8;
+            tb.Height = height * 7 / 8;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.FontSize = 16;
+            tb.Foreground = Brushes.Black;
+            tb.HorizontalAlignment = HorizontalAlignment.Center;
+            tb.VerticalAlignment = VerticalAlignment.Center;
 
-            if (_bottomRight.Y >= _topLeft.Y)
-            {
-                r.SetValue(Canvas.TopProperty, _topLeft.Y);
-            }
-            else
-            {
-                if (_isShiftPressed)
-                    r.SetValue(Canvas.TopProperty, _topLeft.Y - circleDiameter);
-                else
-                    r.SetValue(Canvas.TopProperty, _topLeft.Y - height);
-            }
+            // create a container Grid to hold the rectangle
+            Grid container = new Grid();
 
-            return r;
+            container.Width = maxX - minX;
+            container.Height = maxY - minY;
+            container.Children.Add(r);
+            container.Children.Add(tb);
+
+            Canvas.SetLeft(container, minX);
+            Canvas.SetTop(container, minY);
+
+            return container;
         }
     }
 }
