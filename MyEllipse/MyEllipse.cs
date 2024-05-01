@@ -69,59 +69,63 @@ namespace MyEllipse
 
         public UIElement Convert()
         {
-            double width = Math.Abs(_bottomRight.X - _topLeft.X);
-            double height = Math.Abs(_bottomRight.Y - _topLeft.Y);
-            double circleDiameter = Math.Min(width, height);
+            Point start = new Point(Math.Min(_topLeft.X, _bottomRight.X), Math.Min(_topLeft.Y, _bottomRight.Y));
+            Point end = new Point(Math.Max(_topLeft.X, _bottomRight.X), Math.Max(_topLeft.Y, _bottomRight.Y));
+
+            double width = Math.Abs(end.X - start.X);
+            double height = Math.Abs(end.Y - start.Y);
+
+            Point center = new Point(start.X + width / 2, start.Y + height / 2);
+
+            double minX = center.X - width / 2 - _strokeWidth / 2;
+            double maxX = center.X + width / 2 + _strokeWidth / 2;
+            double minY = center.Y - height / 2 - _strokeWidth / 2;
+            double maxY = center.Y + height / 2 + _strokeWidth / 2;
+
+            double shiftWidth = Math.Min(width, height);
+
+            if (_isShiftPressed)
+            {
+                width = shiftWidth;
+                height = shiftWidth;
+            }
 
             Ellipse e = new Ellipse()
             {
                 Fill = _fill,
                 Stroke = _stroke,
                 StrokeThickness = _strokeWidth,
+                Width = width,
+                Height = height,
             };
+
             if (_strokeDashArray != null)
             {
                 e.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
 
-            if (_isShiftPressed)
-            {
-                // draw a circle
-                e.Width = circleDiameter;
-                e.Height = circleDiameter;
-            }
-            else
-            {
-                // draw an ellipse
-                e.Width = width;
-                e.Height = height;
-            }
+            TextBlock tb = new TextBlock();
 
-            if (_bottomRight.X >= _topLeft.X)
-            {
-                e.SetValue(Canvas.LeftProperty, _topLeft.X);
-            }
-            else
-            {
-                if (_isShiftPressed)
-                    e.SetValue(Canvas.LeftProperty, _topLeft.X - circleDiameter);
-                else
-                    e.SetValue(Canvas.LeftProperty, _topLeft.X - width);
-            }
+            tb.Width = width / 1.25;
+            tb.Height = height / 1.75;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.FontSize = 16;
+            tb.Foreground = Brushes.Black;
+            tb.HorizontalAlignment = HorizontalAlignment.Center;
+            tb.VerticalAlignment = VerticalAlignment.Center;
 
-            if (_bottomRight.Y >= _topLeft.Y)
-            {
-                e.SetValue(Canvas.TopProperty, _topLeft.Y);
-            }
-            else
-            {
-                if (_isShiftPressed)
-                    e.SetValue(Canvas.TopProperty, _topLeft.Y - circleDiameter);
-                else
-                    e.SetValue(Canvas.TopProperty, _topLeft.Y - height);
-            }
+            // create a container Grid to hold the ellipse
+            Grid container = new Grid();
 
-            return e;
+            container.Width = maxX - minX;
+            container.Height = maxY - minY;
+            container.Children.Add(e);
+            container.Children.Add(tb);
+
+            Canvas.SetLeft(container, minX);
+            Canvas.SetTop(container, minY);
+
+            return container;
         }
     }
 }

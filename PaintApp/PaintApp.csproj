@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="img\color_none.png" />
     <None Remove="lines\dash.png" />
     <None Remove="lines\dash_dot.png" />
     <None Remove="lines\solid.png" />
@@ -28,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="img\color_none.png" />
     <Resource Include="lines\dash.png" />
     <Resource Include="lines\dash_dot.png" />
     <Resource Include="lines\solid.png" />

@@ -71,12 +71,22 @@ namespace MyLine
 
         public UIElement Convert()
         {
+            double width = Math.Abs(_end.X - _start.X);
+            double height = Math.Abs(_end.Y - _start.Y);
+
+            Point center = new Point(_start.X + width / 2, _start.Y + height / 2);
+
+            double minX = center.X - width / 2 - _strokeWidth / 2;
+            double maxX = center.X + width / 2 + _strokeWidth / 2;
+            double minY = center.Y - height / 2 - _strokeWidth / 2;
+            double maxY = center.Y + height / 2 + _strokeWidth / 2;
+
             Line l = new Line()
             {
-                X1 = _start.X,
-                Y1 = _start.Y,
-                X2 = _end.X,
-                Y2 = _end.Y,
+                X1 = _start.X - minX,
+                Y1 = _start.Y - minY,
+                X2 = _end.X - minX,
+                Y2 = _end.Y - minY,
                 StrokeThickness = _strokeWidth,
                 Stroke = _stroke,
                 StrokeLineJoin = PenLineJoin.Round
@@ -87,7 +97,16 @@ namespace MyLine
                 l.StrokeDashArray = new DoubleCollection(_strokeDashArray);
             }
 
-            return l;
+            Grid container = new Grid();
+
+            container.Width = maxX - minX;
+            container.Height = maxY - minY;
+            container.Children.Add(l);
+
+            Canvas.SetLeft(container, minX);
+            Canvas.SetTop(container, minY);
+
+            return container;
         }
     }
 

@@ -19,7 +19,6 @@ namespace MyHeart
         private double _strokeWidth;
         private double[]? _strokeDashArray;
 
-
         public IconKind Icon => IconKind.HeartOutline;
         public string Name => "Heart";
 
@@ -137,12 +136,23 @@ namespace MyHeart
             double boundingWidth = maxX - minX;
             double boundingHeight = maxY - minY;
 
+            TextBlock tb = new TextBlock();
+
+            tb.Width = width / 2;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.FontSize = 16;
+            tb.Foreground = Brushes.Black;
+            tb.HorizontalAlignment = HorizontalAlignment.Center;
+            tb.VerticalAlignment = VerticalAlignment.Top;
+            tb.Margin = new Thickness(0, height / 4, 0, height / 2);
+
             // create a container Grid to hold the star
             Grid container = new Grid();
 
             container.Width = boundingWidth;
             container.Height = boundingHeight;
             container.Children.Add(heartPath);
+            container.Children.Add(tb);
 
             // Set the position of the containerGrid
             Canvas.SetLeft(container, minX);
@@ -150,6 +160,5 @@ namespace MyHeart
 
             return container;
         }
-
     }
 }

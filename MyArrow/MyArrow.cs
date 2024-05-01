@@ -9,31 +9,32 @@ namespace MyArrow
 {
     public class MyArrow : IShape
     {
-        private Point _start;
-        private Point _end;
+        private Point _topLeft;
+        private Point _bottomRight;
 
         private bool _isShiftPressed = false;
 
         private SolidColorBrush _stroke;
+        private SolidColorBrush _fill;
         private double _strokeWidth;
         private double[]? _strokeDashArray;
 
-        public IconKind Icon => IconKind.CallMade;
+        public IconKind Icon => IconKind.ArrowRightBoldOutline;
         public string Name => "Arrow";
 
-        public double Top => _start.Y;
-        public double Left => _start.X;
-        public double Bottom => _end.Y;
-        public double Right => _end.X;
+        public double Top => _topLeft.Y;
+        public double Left => _topLeft.X;
+        public double Bottom => _bottomRight.Y;
+        public double Right => _bottomRight.X;
 
         public void AddStart(Point point)
         {
-            _start = point;
+            _topLeft = point;
         }
 
         public void AddEnd(Point point)
         {
-            _end = point;
+            _bottomRight = point;
         }
 
         public void SetShiftState(bool shiftState)
@@ -46,7 +47,9 @@ namespace MyArrow
             _stroke = color;
         }
 
-        public void SetFillColor(SolidColorBrush color) { }
+        public void SetFillColor(SolidColorBrush color) {
+            _fill = color;
+        }
 
         public void SetStrokeWidth(double width)
         {
@@ -65,91 +68,74 @@ namespace MyArrow
 
         public UIElement Convert()
         {
-            // find the arrow shaft unit vector
-            double vx = _end.X - _start.X;
-            double vy = _end.Y - _start.Y;
-            double dist = (double)Math.Sqrt(vx * vx + vy * vy);
+            Point start = new Point(Math.Min(_topLeft.X, _bottomRight.X), Math.Min(_topLeft.Y, _bottomRight.Y));
+            Point end = new Point(Math.Max(_topLeft.X, _bottomRight.X), Math.Max(_topLeft.Y, _bottomRight.Y));
 
-            vx /= dist;
-            vy /= dist;
+            double width = Math.Abs(end.X - start.X);
+            double height = Math.Abs(end.Y - start.Y);
 
-            double wingLength = Math.Max(7, _strokeWidth * 2);
+            Point center = new Point(start.X + width / 2, start.Y + height / 2);
 
-            double ax = wingLength * (-vy - vx);
-            double ay = wingLength * (vx - vy);
+            double minX = center.X - width / 2 - _strokeWidth / 2;
+            double maxX = center.X + width / 2 + _strokeWidth / 2;
+            double minY = center.Y - height / 2 - _strokeWidth / 2;
+            double maxY = center.Y + height / 2 + _strokeWidth / 2;
 
-            Point wing1 = new Point(_end.X + ax, _end.Y + ay);
-            Point wing2 = new Point(_end.X - ay, _end.Y + ax);
+            double shiftWidth = Math.Min(width, height);
 
-            // calculate the bounding box of the arrow
-            double minX = Math.Min(_start.X, Math.Min(_end.X, Math.Min(wing1.X, wing2.X)));
-            double minY = Math.Min(_start.Y, Math.Min(_end.Y, Math.Min(wing1.Y, wing2.Y)));
-            double maxX = Math.Max(_start.X, Math.Max(_end.X, Math.Max(wing1.X, wing2.X)));
-            double maxY = Math.Max(_start.Y, Math.Max(_end.Y, Math.Max(wing1.Y, wing2.Y)));
-
-            double width = maxX - minX;
-            double height = maxY - minY;
-
-            // create the arrow shaft
-            Line line = new Line
+            if (_isShiftPressed)
             {
-                X1 = _start.X - minX,
-                Y1 = _start.Y - minY,
-                X2 = _end.X - minX,
-                Y2 = _end.Y - minY,
-                Stroke = _stroke,
-                StrokeThickness = _strokeWidth
-            };
-
-            if (_strokeDashArray != null)
-            {
-                line.StrokeDashArray = new DoubleCollection(_strokeDashArray);
+                width = shiftWidth;
+                height = shiftWidth;
             }
 
-            // create the arrowhead
-            PathFigure arrowHeadPath = new PathFigure();
-            arrowHeadPath.StartPoint = new Point(wing1.X - minX , wing1.Y - minY);
-            arrowHeadPath.Segments.Add(new LineSegment(new Point(_end.X - minX, _end.Y - minY), true));
-            arrowHeadPath.Segments.Add(new LineSegment(new Point(wing2.X - minX, wing2.Y - minY), true));
-
+            // create a PathGeometry to hold the arrow shape
             PathGeometry arrowGeometry = new PathGeometry();
-            arrowGeometry.Figures.Add(arrowHeadPath);
+            PathFigure arrowFigure = new PathFigure();
 
-            Path arrowHead = new Path
-            {
-                Data = arrowGeometry,
-                Stroke = _stroke,
-                StrokeThickness = _strokeWidth,
-                StrokeLineJoin = PenLineJoin.Round
-            };
+            arrowFigure.StartPoint = new Point(start.X - minX, start.Y + height / 4 - minY);
 
-            // combine arrow line and arrowhead into a single container
-            Grid container = new Grid
-            {
-                Width = width,
-                Height = height
-            };
+            arrowFigure.Segments.Add(new LineSegment(new Point(start.X + width / 2 - minX, start.Y + height / 4 - minY), true));
+            arrowFigure.Segments.Add(new LineSegment(new Point(start.X + width / 2 - minX, start.Y - minY), true));
+            arrowFigure.Segments.Add(new LineSegment(new Point(end.X - minX, start.Y + height / 2 - minY), true));
+            arrowFigure.Segments.Add(new LineSegment(new Point(start.X + width / 2 - minX, end.Y - minY), true));
+            arrowFigure.Segments.Add(new LineSegment(new Point(start.X + width / 2 - minX, end.Y - height / 4 - minY), true));
+            arrowFigure.Segments.Add(new LineSegment(new Point(start.X - minX, end.Y - height / 4 - minY), true));
 
-            container.Children.Add(line);
-            container.Children.Add(arrowHead);
+            // close the arrow by connecting the last point to the start point
+            arrowFigure.IsClosed = true;
+            arrowGeometry.Figures.Add(arrowFigure);
 
-            if (_end.X >= _start.X)
-            {
-                container.SetValue(Canvas.LeftProperty, _start.X);
-            }
-            else
-            {
-                container.SetValue(Canvas.LeftProperty, _start.X - width);
-            }
+            // add the arrowPath to the container Grid
+            Path arrowPath = new Path();
+            arrowPath.Fill = _fill;
+            arrowPath.Stroke = _stroke;
+            arrowPath.StrokeThickness = _strokeWidth;
+            arrowPath.StrokeLineJoin = PenLineJoin.Round;
+            arrowPath.StrokeDashArray = new DoubleCollection(_strokeDashArray ?? new double[] { });
+            arrowPath.Data = arrowGeometry;
 
-            if (_end.Y >= _start.Y)
-            {
-                container.SetValue(Canvas.TopProperty, _start.Y);
-            }
-            else
-            {
-                container.SetValue(Canvas.TopProperty, _start.Y - height);
-            }
+            TextBlock tb = new TextBlock();
+
+            tb.Width = width / 1.5;
+            tb.Height = height / 3;
+            tb.TextWrapping = TextWrapping.Wrap;
+            tb.FontSize = 16;
+            tb.Foreground = Brushes.Black;
+            tb.HorizontalAlignment = HorizontalAlignment.Left;
+            tb.VerticalAlignment = VerticalAlignment.Center;
+            tb.Margin = new Thickness(width / 9, 0, 0, 0);
+
+            // create a container Grid to hold the arrow
+            Grid container = new Grid();
+
+            container.Width = maxX - minX;
+            container.Height = maxY - minY;
+            container.Children.Add(arrowPath);
+            container.Children.Add(tb);
+
+            Canvas.SetLeft(container, minX);
+            Canvas.SetTop(container, minY);
 
             return container;
         }

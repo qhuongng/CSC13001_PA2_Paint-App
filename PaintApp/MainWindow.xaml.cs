@@ -1,16 +1,17 @@
 ﻿using Shapes;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
+using static System.Net.Mime.MediaTypeNames;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
@@ -24,67 +25,98 @@ namespace PaintApp
 
         public ShapeElement(UIElement element, string name, IconKind icon)
         {
+            MemoryStream stream = new MemoryStream();
+
+            XamlWriter.Save(element, stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
+            clonedElement.RenderSize = element.RenderSize;
+
+            Canvas.SetTop(clonedElement, Canvas.GetTop(element));
+            Canvas.SetLeft(clonedElement, Canvas.GetLeft(element));
+
             Element = element;
             ElementName = name;
             ElementIcon = icon;
         }
+
         public ShapeElementMemento createMemento()
         {
-            return new ShapeElementMemento(Element,ElementName,ElementIcon);
+            return new ShapeElementMemento(Element, ElementName, ElementIcon);
         }
+
         public void restoreFromMemento(ShapeElementMemento memento)
         {
             MemoryStream stream = new MemoryStream();
+
             XamlWriter.Save(memento.GetElement(), stream);
             stream.Seek(0, SeekOrigin.Begin);
+
             UIElement clonedElement = (UIElement)XamlReader.Load(stream);
             Canvas.SetTop(clonedElement, Canvas.GetTop(memento.GetElement()));
             Canvas.SetLeft(clonedElement, Canvas.GetLeft(memento.GetElement()));
-            this.Element = clonedElement;
-            this.ElementName = memento.GetElementName();
-            this.ElementIcon = memento.GetIcon();
-
+          
+            Element = clonedElement;
+            ElementName = memento.GetElementName();
+            ElementIcon = memento.GetIcon();
         }
     }
+
     public class ShapeElementMemento
     {
         private readonly UIElement element;
         private readonly string elementName;
         private readonly IconKind elementIcon;
-        public ShapeElementMemento(UIElement ele,string name,IconKind icon)
+
+        public ShapeElementMemento(UIElement ele, string name, IconKind icon)
         {
             // Tạo bản sao của UIElement
             MemoryStream stream = new MemoryStream();
+
             XamlWriter.Save(ele, stream);
             stream.Seek(0, SeekOrigin.Begin);
+
             UIElement clonedElement = (UIElement)XamlReader.Load(stream);
+          
             Canvas.SetTop(clonedElement,Canvas.GetTop(ele));
             Canvas.SetLeft(clonedElement,Canvas.GetLeft(ele));
+          
+            element = clonedElement;
+            elementName = name;
+            elementIcon = icon;
+            
             this.element = clonedElement;
             this.elementName = name;
             this.elementIcon = icon;
         }
+
         public UIElement GetElement()
         {
             return element;
         }
+
         public string GetElementName()
         {
             return elementName;
         }
+
         public IconKind GetIcon()
         {
             return elementIcon;
         }
     }
+
     public class CareTakerShape
     {
         public List<ShapeElementMemento> historyMemento = new List<ShapeElementMemento>();
         public Dictionary<int, string> removeMemento = new Dictionary<int, string>();
+      
         public void addMemento(ShapeElementMemento memento) 
         { 
             historyMemento.Add(memento);
         }
+
         public ShapeElementMemento GetMemento(int index)
         {
             return historyMemento[index];
@@ -99,10 +131,12 @@ namespace PaintApp
             return removeMemento[index];
         }
     }
+
     public partial class MainWindow : Window
     {
         bool _isDrawing = false;
         bool _isDragging = false;
+        bool _justEditedText = false;
 
         Point _start;
         Point _end;
@@ -122,6 +156,8 @@ namespace PaintApp
 
         public ObservableCollection<BitmapImage> StrokeTypes { get; set; }
         public BitmapImage StrokeType { get; set; }
+
+        public ObservableCollection<double> FontSizes { get; set; }
 
         public ObservableCollection<ShapeElement> ShapeList { get; set; }
 
@@ -154,15 +190,21 @@ namespace PaintApp
             StrokeWidths = new ObservableCollection<double> { 1, 3, 5, 8 };
             StrokeWidth = 1;
 
+            FontSizes = new ObservableCollection<double> { 6, 8, 10, 12, 16, 20, 24, 28, 32, 36 };
+
             StrokeTypes = new ObservableCollection<BitmapImage> { solid, dash, dash_dot };
             StrokeType = StrokeTypes[0];
 
-            ShapeList = new ObservableCollection<ShapeElement>(); 
+            ShapeList = new ObservableCollection<ShapeElement>();
             careTaker = new CareTakerShape();
+
             BtnRedo.IsEnabled = false;
             iconRedo.Foreground = Brushes.Gray;
+
             BtnUndo.IsEnabled = false;
             iconUndo.Foreground = Brushes.Gray;
+
+            FontCb.ItemsSource = Fonts.SystemFontFamilies;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -202,7 +244,7 @@ namespace PaintApp
                         Width = 36,
                         Height = 36,
                         Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.White), Width = 24, Height = 24 },
-                        Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
+                        Style = System.Windows.Application.Current.Resources["IconRadioButtonStyle"] as Style,
                         GroupName = "CtrlBtn",
                         Tag = item,
                     };
@@ -220,14 +262,16 @@ namespace PaintApp
 
         private void Canvas_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+            if (_painter != null && (e.Key == Key.LeftShift || e.Key == Key.RightShift))
             {
                 _painter.SetShiftState(true);
             }
-            if(e.Key == Key.Z && Keyboard.Modifiers == ModifierKeys.Control)
+
+            if (e.Key == Key.Z && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 UndoBtn_Click(null, null);
             }
+
             if (e.Key == Key.Y && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 RedoBtn_Click(null, null);
@@ -247,7 +291,7 @@ namespace PaintApp
 
         private void Canvas_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+            if (_painter != null && (e.Key == Key.LeftShift || e.Key == Key.RightShift))
             {
                 _painter.SetShiftState(false);
             }
@@ -258,6 +302,7 @@ namespace PaintApp
             //xử lí logic về hiện hoặc tắt button undo redo
             BtnRedo.IsEnabled = true;
             iconRedo.Foreground = Brushes.White;
+
             if (currentPosition <= 0)
             {
                 BtnUndo.IsEnabled = false;
@@ -266,10 +311,12 @@ namespace PaintApp
                 DrawingCanvas.Children.Clear();
                 currentPosition = -1;
             }
+
             if (currentPosition > 0)
             {
                 string nameShapeBefore = careTaker.GetMemento(currentPosition - 1).GetElementName();
                 string nameShapeCurrent = careTaker.GetMemento(currentPosition).GetElementName();
+                
                 /// TH nếu vị trí hiện tại là một hình bị xóa
                 if(nameShapeCurrent.Equals("cut"))
                 {
@@ -320,9 +367,9 @@ namespace PaintApp
         {
             if (currentPosition < careTaker.historyMemento.Count - 1)
             {
-                
-                //kiểm tra xem hình sau trong list có chưa, chưa có thì thêm vào
+                // kiểm tra xem hình sau trong list có chưa, chưa có thì thêm vào
                 string shapeNameAfter = careTaker.GetMemento(currentPosition + 1).GetElementName();
+                
                 if (shapeNameAfter.Equals("cut"))
                 {
                     string elementNameAfter = careTaker.getRemoveElement(currentPosition + 1);
@@ -347,6 +394,7 @@ namespace PaintApp
                         newShape.restoreFromMemento(careTaker.GetMemento(currentPosition + 1));
                     }
                 }
+
                 currentPosition++;
                 DrawingCanvas.Children.Clear();
 
@@ -366,7 +414,6 @@ namespace PaintApp
                     iconRedo.Foreground = Brushes.Gray;
                 }
             }
-            
         }
         
         private void RotateRightBtn_Click(object sender, RoutedEventArgs e)
@@ -534,16 +581,30 @@ namespace PaintApp
                 _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             }
 
+            // shapes consist of Path(s) and a TextBlock wrapped inside a Grid
             if (_selectedElement != null)
             {
-                if (_selectedElement.Element is Shape)
+                // if the user is editing the shape's text, change the textblock's background color
+                if (TextPanel.Visibility == Visibility.Visible)
                 {
-                    (_selectedElement.Element as Shape).Fill = FillClr.Background;
+                    TextBlock target = null;
+
+                    foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+                    {
+                        if (child is TextBlock)
+                        {
+                            target = child as TextBlock;
+                        }
+                    }
+
+                    if (target != null)
+                    {
+                        target.Background = FillClr.Background;
+                    }
                 }
-                else if (_selectedElement.Element is Grid)
+                else
                 {
-                    // custom shapes consists of Path(s) wrapped inside a Grid
-                    // find all Paths that are child of the grid and modify their colors
+                    // find all Paths that are children of the grid and modify their colors
                     foreach (UIElement child in (_selectedElement.Element as Grid).Children)
                     {
                         if (child is System.Windows.Shapes.Path)
@@ -557,6 +618,7 @@ namespace PaintApp
                         }
                     }
                 }
+
                 updateMemento();
                 DrawingCanvas.Children.Clear();
 
@@ -564,11 +626,12 @@ namespace PaintApp
                 {
                     DrawingCanvas.Children.Add(shape.Element);
                 }
-                SetSelected();
+
+                SetSelected(true);
             }
         }
 
-        // change stroke color on left-click
+        // change stroke color/text color on left-click
         private void ColorBtn_Click(object sender, RoutedEventArgs e)
         {
             Button b = (Button)sender;
@@ -582,11 +645,25 @@ namespace PaintApp
 
             if (_selectedElement != null)
             {
-                if (_selectedElement.Element is Shape)
+                if (TextPanel.Visibility == Visibility.Visible)
                 {
-                    (_selectedElement.Element as Shape).Stroke = StrokeClr.Background;
+                    TextBlock target = null;
+
+                    foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+                    {
+                        if (child is TextBlock)
+                        {
+                            target = child as TextBlock;
+                        }
+                    }
+
+                    if (target != null)
+                    {
+                        target.Foreground = StrokeClr.Background;
+                    }
                 }
-                else if (_selectedElement.Element is Grid) {
+                else
+                {
                     foreach (UIElement child in (_selectedElement.Element as Grid).Children)
                     {
                         if (child is System.Windows.Shapes.Path)
@@ -600,6 +677,7 @@ namespace PaintApp
                         }
                     }
                 }
+
                 updateMemento();
                 DrawingCanvas.Children.Clear();
 
@@ -608,7 +686,7 @@ namespace PaintApp
                     DrawingCanvas.Children.Add(shape.Element);
                 }
 
-                SetSelected();
+                SetSelected(true);
             }
         }
 
@@ -624,7 +702,7 @@ namespace PaintApp
 
             DrawingCanvas.Children.Remove(_selectionBounds);
             SelectionPane.UnselectAll();
-            SetSelected();
+            SetSelected(false);
 
             CanvasHelper.Visibility = Visibility.Visible;
         }
@@ -632,8 +710,212 @@ namespace PaintApp
         private void MoveBtn_Click(object sender, RoutedEventArgs e)
         {
             _painter = null;
-
             CanvasHelper.Visibility = Visibility.Collapsed;
+        }
+
+        private void TextBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedElement == null)
+            {
+                return;
+            }
+
+            _painter = null;
+            CanvasHelper.Visibility = Visibility.Collapsed;
+            TextPanel.Visibility = Visibility.Visible;
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                FontCb.SelectedItem = target.FontFamily;
+                ElementTb.Text = target.Text;
+                FontSizeCb.SelectedItem = target.FontSize;
+
+                if (target.FontStyle == FontStyles.Italic)
+                {
+                    BtnItalic.IsChecked = true;
+                }
+                else
+                {
+                    BtnItalic.IsChecked = false;
+                }
+
+                if (target.FontWeight == FontWeights.Bold)
+                {
+                    BtnBold.IsChecked = true;
+                }
+                else
+                {
+                    BtnBold.IsChecked = false;
+                }
+
+                if (target.TextDecorations == TextDecorations.Underline)
+                {
+                    BtnUnderline.IsChecked = true;
+                }
+                else
+                {
+                    BtnUnderline.IsChecked = false;
+                }
+
+                switch (target.TextAlignment)
+                {
+                    case TextAlignment.Center:
+                        BtnCenter.IsChecked = true;
+                        break;
+                    case TextAlignment.Left:
+                        BtnLeft.IsChecked = true;
+                        break;
+                    case TextAlignment.Right:
+                        BtnRight.IsChecked = true;
+                        break;
+                }
+
+                ElementTb.Focus();
+            }
+        }
+
+        private void TextBtn_Unchecked(object sender, RoutedEventArgs e)
+        {
+            TextPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private void ElementTb_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_selectedElement == null)
+            {
+                return;
+            }
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                target.Text = ElementTb.Text;
+                _justEditedText = true;
+            }
+        }
+
+        private void ElementTb_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (_justEditedText)
+            {
+                updateMemento();
+                _justEditedText = false;
+            }
+        }
+
+        private void BoldBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleButton tb = sender as ToggleButton;
+
+            if (_selectedElement == null)
+            {
+                return;
+            }
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                if (tb.IsChecked == true)
+                {
+                    target.FontWeight = FontWeights.Bold;
+                }
+                else
+                {
+                    target.FontWeight = FontWeights.Regular;
+                }
+            }
+        }
+
+        private void ItalicBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleButton tb = sender as ToggleButton;
+
+            if (_selectedElement == null)
+            {
+                return;
+            }
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                if (tb.IsChecked == true)
+                {
+                    target.FontStyle = FontStyles.Italic;
+                }
+                else
+                {
+                    target.FontStyle = FontStyles.Normal;
+                }
+            }
+        }
+
+        private void UnderlineBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleButton tb = sender as ToggleButton;
+
+            if (_selectedElement == null)
+            {
+                return;
+            }
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                if (tb.IsChecked == true)
+                {
+                    target.TextDecorations = TextDecorations.Underline;
+                }
+                else
+                {
+                    target.TextDecorations = null;
+                }
+            }
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -646,7 +928,7 @@ namespace PaintApp
 
                 DrawingCanvas.Children.Remove(_selectionBounds);
                 SelectionPane.UnselectAll();
-                SetSelected();
+                SetSelected(false);
             }
         }
 
@@ -678,21 +960,89 @@ namespace PaintApp
 
                 IShape clone = (IShape)_painter.Clone();
                 int index = indexShape[clone.Name];
-                //
+
                 if (index == 0)
                 {
                     ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon);
                     indexShape[clone.Name] = 1;
                     ShapeList.Add(newShape);
-                } else
+                }
+                else
                 {
                     ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
                     indexShape[clone.Name] += 1;
                     ShapeList.Add(newShape);
                 }
+
                 SelectionPane.SelectedItem = ShapeList.Last();
+
+                _prevSelectedElement = _selectedElement;
+
+                if (_prevSelectedElement != null)
+                {
+                    _prevSelectedElement.Element.MouseDown -= Element_MouseDown;
+                    _prevSelectedElement.Element.MouseMove -= Element_MouseMove;
+                    _prevSelectedElement.Element.MouseUp -= Element_MouseUp;
+                }
+
                 _selectedElement = ShapeList.Last();
+
+                _selectedElement.Element.MouseDown += Element_MouseDown;
+                _selectedElement.Element.MouseMove += Element_MouseMove;
+                _selectedElement.Element.MouseUp += Element_MouseUp;
+
+                BoundSelectedElement();
+
+                BtnText.IsEnabled = true;
+                iconText.Foreground = Brushes.White;
+
                 updateMemento();
+            }
+        }
+
+        private void FontCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_selectedElement == null)
+            {
+                return;
+            }
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                target.FontFamily = (FontFamily)FontCb.SelectedItem;
+            }
+        }
+
+        private void FontSizeCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_selectedElement == null)
+            {
+                return;
+            }
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                target.FontSize = (double)FontSizeCb.SelectedItem;
             }
         }
 
@@ -702,6 +1052,7 @@ namespace PaintApp
 
             if (strokeWidthCb.SelectedItem != null)
             {
+                double oldStrokeWidth = StrokeWidth;
                 StrokeWidth = (double)strokeWidthCb.SelectedItem;
 
                 if (_painter != null)
@@ -717,14 +1068,33 @@ namespace PaintApp
                     }
                     else if (_selectedElement.Element is Grid)
                     {
+                        Grid element = _selectedElement.Element as Grid;
+
                         // custom shapes consists of Path(s) wrapped inside a Grid
                         // find all Paths that are child of the grid and modify their colors
-                        foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                        foreach (UIElement child in element.Children)
                         {
                             if (child is System.Windows.Shapes.Path)
                             {
                                 System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
+
                                 path.StrokeThickness = StrokeWidth;
+
+                                double oldWidth = element.ActualWidth;
+                                double oldHeight = element.ActualHeight;
+
+                                double minX = Canvas.GetLeft(element) + (StrokeWidth - oldStrokeWidth);
+                                double minY = Canvas.GetTop(element) + (StrokeWidth - oldStrokeWidth);
+
+                                double boundingWidth = oldWidth + (StrokeWidth - oldStrokeWidth);
+                                double boundingHeight = oldHeight + (StrokeWidth - oldStrokeWidth);
+
+                                // Update container size and position
+                                element.Width = boundingWidth;
+                                element.Height = boundingHeight;
+
+                                Canvas.SetLeft(element, minX);
+                                Canvas.SetTop(element, minY);
                             }
                             else if (child is Shape)
                             {
@@ -732,6 +1102,7 @@ namespace PaintApp
                             }
                         }
                     }
+
                     updateMemento();
                     DrawingCanvas.Children.Clear();
 
@@ -740,7 +1111,7 @@ namespace PaintApp
                         DrawingCanvas.Children.Add(shape.Element);
                     }
 
-                    SetSelected();
+                    SetSelected(false);
                 }
             }
         }
@@ -788,6 +1159,7 @@ namespace PaintApp
                             }
                         }
                     }
+
                     updateMemento();
                     DrawingCanvas.Children.Clear();
 
@@ -796,7 +1168,7 @@ namespace PaintApp
                         DrawingCanvas.Children.Add(shape.Element);
                     }
 
-                    SetSelected();
+                    SetSelected(false);
                 }
             }
         }
@@ -840,6 +1212,8 @@ namespace PaintApp
 
         private void Element_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            MoveBtn_Click(null, null);
+
             _isDragging = true;
             _dragStart = Mouse.GetPosition(DrawingCanvas);
 
@@ -870,14 +1244,17 @@ namespace PaintApp
         {
             _isDragging = false;
             _dragStart = new Point();
+
             updateMemento();
             BoundSelectedElement();
-            
+
             (sender as UIElement).ReleaseMouseCapture();
         }
 
         private void BoundSelectedElement()
         {
+            DrawingCanvas.Children.Remove(_selectionBounds);
+
             if (_selectedElement == null)
             {
                 return;
@@ -906,11 +1283,17 @@ namespace PaintApp
 
         private void SelectionPane_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SetSelected();
+            SetSelected(false);
         }
 
-        private void SetSelected()
+        private void SetSelected(bool isColorChange)
         {
+            if (_justEditedText)
+            {
+                updateMemento();
+                _justEditedText = false;
+            }
+
             _prevSelectedElement = _selectedElement;
 
             if (_prevSelectedElement != null)
@@ -928,7 +1311,6 @@ namespace PaintApp
                 _selectedElement.Element.MouseMove += Element_MouseMove;
                 _selectedElement.Element.MouseUp += Element_MouseUp;
 
-                DrawingCanvas.Children.Remove(_selectionBounds);
                 BoundSelectedElement();
 
                 if (_selectedElement.Element is Shape)
@@ -965,35 +1347,45 @@ namespace PaintApp
                     }
                 }
 
-                // activate the move tool by default
-                BtnMove.IsChecked = true;
-                MoveBtn_Click(null, null);
+                if (!isColorChange)
+                {
+                    // activate the move tool by default
+                    BtnMove.IsChecked = true;
+                    MoveBtn_Click(null, null);
+                }
+
+                BtnText.IsEnabled = true;
+                iconText.Foreground = Brushes.White;
+            }
+            else
+            {
+                BtnText.IsEnabled = false;
+                iconText.Foreground = Brushes.Gray;
             }
         }
 
         private void updateMemento()
         {
-            if(_selectedElement != null)
+            if (currentPosition < careTaker.historyMemento.Count - 1)
             {
-                if (currentPosition < careTaker.historyMemento.Count - 1)
+                for (int i = currentPosition + 1; i < careTaker.historyMemento.Count; i++)
                 {
-                    for (int i = currentPosition + 1; i < careTaker.historyMemento.Count; i++)
-                    {
-                        careTaker.historyMemento.Remove(careTaker.GetMemento(i));
-                    }
+                    careTaker.historyMemento.Remove(careTaker.GetMemento(i));
                 }
-                careTaker.addMemento(_selectedElement.createMemento());
-                currentPosition++;
-                if (BtnRedo.IsEnabled == true)
-                {
-                    BtnRedo.IsEnabled = false;
-                    iconRedo.Foreground = Brushes.Gray;
-                }
-                if (currentPosition == 0)
-                {
-                    BtnUndo.IsEnabled = true;
-                    iconUndo.Foreground = Brushes.White;
-                }
+            }
+
+            careTaker.addMemento(_selectedElement.createMemento());
+            currentPosition++;
+
+            if (BtnRedo.IsEnabled == true)
+            {
+                BtnRedo.IsEnabled = false;
+                iconRedo.Foreground = Brushes.Gray;
+            }
+            if (currentPosition == 0)
+            {
+                BtnUndo.IsEnabled = true;
+                iconUndo.Foreground = Brushes.White;
             }
         }
 
