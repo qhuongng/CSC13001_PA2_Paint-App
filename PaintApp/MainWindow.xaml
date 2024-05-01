@@ -237,11 +237,15 @@
                 </Grid>
 
                 <Border>
-                    <Button x:Name="BtnTransparent" HorizontalAlignment="Left" MouseDown="TransparentBtn_MouseDown"
-                            Height="32" Width="32" Click="TransparentBtn_Click">
+                    <Button x:Name="BtnTransparent" HorizontalAlignment="Left" MouseDown="ColorBtn_MouseDown"
+                            Height="32" Width="32" Background="Transparent" Click="ColorBtn_Click">
                         <Button.Template>
                             <ControlTemplate>
-                                <Ellipse Name="BtnFill" Fill="{TemplateBinding Background}" />
+                                <Ellipse x:Name="BtnFill" Stroke="#9D9D9D">
+                                    <Ellipse.Fill>
+                                        <ImageBrush ImageSource="pack://application:,,,/img/color_none.png" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
 
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="true">
@@ -250,16 +254,6 @@
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Button.Template>
-                        
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Button.Background">
-                                    <Setter.Value>
-                                        <ImageBrush ImageSource="pack://application:,,,/img/color_none.png" />
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Style>
                     </Button>
                 </Border>
             </DockPanel>
