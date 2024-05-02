@@ -9,7 +9,9 @@ using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
@@ -131,6 +133,7 @@ namespace PaintApp
         bool _isDrawing = false;
         bool _isDragging = false;
         bool _justEditedText = false;
+        bool _isSelectArea = false;
 
         Point _start;
         Point _end;
@@ -777,6 +780,21 @@ namespace PaintApp
             CanvasHelper.Visibility = Visibility.Visible;
         }
 
+        private void SelectAreaBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _isSelectArea = true;
+            _painter = _prototypes.FirstOrDefault(x => x.Name.Equals("Rectangle"));
+            _painter.SetStrokeColor(new SolidColorBrush(Colors.Red));
+            _painter.SetStrokeWidth(1);
+            _painter.SetStrokeDashArray(new Double[] {5,2});
+
+            DrawingCanvas.Children.Remove(_selectionBounds);
+            SelectionPane.UnselectAll();
+            SetSelected(false);
+
+            CanvasHelper.Visibility = Visibility.Visible;
+        }
+
         private void MoveBtn_Click(object sender, RoutedEventArgs e)
         {
             _painter = null;
@@ -1027,27 +1045,60 @@ namespace PaintApp
             if (_painter != null)
             {
                 _isDrawing = false;
-
-                IShape clone = (IShape)_painter.Clone();
-                int index = indexShape[clone.Name];
-
-                if (index == 0)
+                if(_isSelectArea)
                 {
-                    ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon);
-                    indexShape[clone.Name] = 1;
-                    ShapeList.Add(newShape);
-                }
-                else
+
+                    double width = (double)(_visual.RenderSize.Width);
+                    double height = (double)(_visual.RenderSize.Height);
+
+                    RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
+                        (int)Math.Round(width),
+                        (int)Math.Round(height),
+                        96.0,
+                        96.0,
+                        PixelFormats.Default
+                    );
+                    DrawingVisual dv = new DrawingVisual();
+                    
+                    using (DrawingContext dc = dv.RenderOpen())
+                    {
+                        VisualBrush vb = new VisualBrush(DrawingCanvas);
+                        Rect rect = new Rect
+                        {
+                            X = (double)_visual.GetValue(Canvas.LeftProperty) - 120 - 141,
+                            Y = (double)_visual.GetValue(Canvas.TopProperty) - 60,
+                            Width = width,
+                            Height = height,
+                        };
+                        dc.DrawRectangle(vb, null, rect);
+                    }
+                    renderBitmap.Render(dv);
+
+                    Clipboard.SetImage(renderBitmap);
+                    DrawingCanvas.Children.Remove(_visual);
+                } else
                 {
-                    ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
-                    indexShape[clone.Name] += 1;
-                    ShapeList.Add(newShape);
+                    IShape clone = (IShape)_painter.Clone();
+                    int index = indexShape[clone.Name];
+
+                    if (index == 0)
+                    {
+                        ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon);
+                        indexShape[clone.Name] = 1;
+                        ShapeList.Add(newShape);
+                    }
+                    else
+                    {
+                        ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
+                        indexShape[clone.Name] += 1;
+                        ShapeList.Add(newShape);
+                    }
+
+                    SelectionPane.SelectedItem = ShapeList.Last();
+
+                    SetSelected(false);
+                    UpdateMemento();
                 }
-
-                SelectionPane.SelectedItem = ShapeList.Last();
-
-                SetSelected(false);
-                UpdateMemento();
             }
         }
 
