@@ -5,7 +5,6 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows;
 using System.Windows.Shapes;
-using System.Windows.Media.Media3D;
 
 namespace PaintApp
 {
@@ -13,12 +12,9 @@ namespace PaintApp
     {
         VisualCollection _adornerVisuals;
 
-        Thumb _topLeftThumb;
-        Thumb _bottomRightThumb;
+        public Thumb Thumb { get; set; }
 
-        Rectangle _border;
-
-        Thickness _textBoxMargins;
+        public Rectangle Border { get; set; }
 
         Dictionary<string, IShape> painters = new Dictionary<string, IShape>
         {
@@ -36,7 +32,7 @@ namespace PaintApp
         {
             _adornerVisuals = new VisualCollection(this);
 
-            _topLeftThumb = new Thumb()
+            Thumb = new Thumb()
             {
                 Background = Brushes.BlanchedAlmond,
                 BorderBrush = Brushes.Red,
@@ -45,34 +41,19 @@ namespace PaintApp
                 Height = 10
             };
 
-            _bottomRightThumb = new Thumb()
-            {
-                Background = Brushes.BlanchedAlmond,
-                BorderBrush = Brushes.Red,
-                BorderThickness = new Thickness(1),
-                Width = 10,
-                Height = 10
-            };
+            Thumb.DragStarted += Thumb_DragStarted;
+            Thumb.DragDelta += Thumb_DragDelta;
+            Thumb.DragCompleted += Thumb_DragCompleted;
 
-            _topLeftThumb.DragStarted += Thumb_DragStarted;
-            _bottomRightThumb.DragStarted += Thumb_DragStarted;
-
-            _topLeftThumb.DragDelta += TopLeftThumb_DragDelta;
-            _bottomRightThumb.DragDelta += BottomRightThumb_DragDelta;
-
-            _topLeftThumb.DragCompleted += Thumb_DragCompleted;
-            _bottomRightThumb.DragCompleted += Thumb_DragCompleted;
-
-            _border = new Rectangle()
+            Border = new Rectangle()
             {
                 Stroke = Brushes.Red,
                 StrokeThickness = 1,
                 StrokeDashArray = new DoubleCollection([3, 2])
             };
 
-            _adornerVisuals.Add(_border);
-            _adornerVisuals.Add(_topLeftThumb);
-            _adornerVisuals.Add(_bottomRightThumb);
+            _adornerVisuals.Add(Border);
+            _adornerVisuals.Add(Thumb);
         }
 
         private string GetKeyFromElementName(string elementName)
@@ -108,89 +89,7 @@ namespace PaintApp
             }
         }
 
-        private void TopLeftThumb_DragDelta(object sender, DragDeltaEventArgs e)
-        {
-            MainWindow mw = (MainWindow)Application.Current.MainWindow;
-
-            var element = (FrameworkElement)AdornedElement;
-
-            // store the original bottom-right corner to use as anchor point
-            Point oldBottomRight = new Point(Canvas.GetLeft(element) + element.Width, Canvas.GetTop(element) + element.Height);
-
-            double newWidth = element.Width - e.HorizontalChange < 0 ? 0 : element.Width - e.HorizontalChange;
-            double newHeight = element.Height - e.VerticalChange < 0 ? 0 : element.Height - e.VerticalChange;
-
-            // calculate the new top-left corner
-            double newLeft = oldBottomRight.X - newWidth;
-            double newTop = oldBottomRight.Y - newHeight;
-
-            // scale the container grid
-            Canvas.SetLeft(element, newLeft);
-            Canvas.SetTop(element, newTop);
-
-            element.Width = newWidth;
-            element.Height = newHeight;
-
-            // update the position of the adorner visuals
-            _border.Arrange(new Rect(-2.5, -2.5, element.DesiredSize.Width + 5, element.DesiredSize.Height + 5));
-            _topLeftThumb.Arrange(new Rect(-5, -5, 10, 10));
-            _bottomRightThumb.Arrange(new Rect(element.DesiredSize.Width - 5, element.DesiredSize.Height - 5, 10, 10));
-
-            UIElement shape = null;
-            TextBlock textBlock = null;
-
-            foreach (UIElement child in ((Grid)AdornedElement).Children)
-            {
-                if (child is TextBlock)
-                {
-                    textBlock = child as TextBlock;
-                }
-                else
-                {
-                    shape = child;
-                }
-            }
-
-            if (textBlock != null)
-            {
-                // scale the text block
-                textBlock.Width = textBlock.Width - e.HorizontalChange < 0 ? 0 : textBlock.Width - e.HorizontalChange;
-                textBlock.Height = textBlock.Height - e.VerticalChange < 0 ? 0 : textBlock.Height - e.VerticalChange;
-            }
-
-            if (shape != null)
-            {
-                // scale the shape
-                if (mw.SelectedElement.ElementName != "Ellipse" && mw.SelectedElement.ElementName != "Rectangle" && mw.SelectedElement.ElementName != "Rounded Rectangle")
-                {
-                    ((Grid)element).Children.Remove(shape);
-
-                    _painter.AddStart(new Point(newLeft, newTop));
-
-                    if (mw.SelectedElement.ElementName.Contains("Heart"))
-                    {
-                        _painter.AddEnd(new Point(oldBottomRight.X -= newWidth / 14, oldBottomRight.Y -= newHeight / 6.75));
-                    }
-                    else
-                    {
-                        _painter.AddEnd(oldBottomRight);
-                    }
-
-                    UIElement modified = _painter.Convert();
-
-                    ((Grid)element).Children.Insert(0, modified);
-                }
-                else
-                {
-                    var s = (FrameworkElement)shape;
-
-                    s.Height = newHeight;
-                    s.Width = newWidth;
-                }
-            }
-        }
-
-        private void BottomRightThumb_DragDelta(object sender, DragDeltaEventArgs e)
+        private void Thumb_DragDelta(object sender, DragDeltaEventArgs e)
         {
             MainWindow mw = (MainWindow)Application.Current.MainWindow;
 
@@ -271,10 +170,8 @@ namespace PaintApp
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            _border.Arrange(new Rect(-2.5, -2.5, AdornedElement.DesiredSize.Width + 5, AdornedElement.DesiredSize.Height + 5));
-
-            _topLeftThumb.Arrange(new Rect(-5, -5, 10, 10));
-            _bottomRightThumb.Arrange(new Rect(AdornedElement.DesiredSize.Width - 5, AdornedElement.DesiredSize.Height - 5, 10, 10));
+            Border.Arrange(new Rect(-2.5, -2.5, AdornedElement.DesiredSize.Width + 5, AdornedElement.DesiredSize.Height + 5));
+            Thumb.Arrange(new Rect(AdornedElement.DesiredSize.Width - 5, AdornedElement.DesiredSize.Height - 5, 10, 10));
 
             return base.ArrangeOverride(finalSize);
         }

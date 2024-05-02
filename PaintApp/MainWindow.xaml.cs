@@ -475,6 +475,22 @@ namespace PaintApp
 
                 SelectedElement.Element.RenderTransform = transformGroup;
 
+                // update positions of top-left and bottom-right thumbs
+                Point topLeft = new Point(Canvas.GetLeft(SelectedElement.Element), Canvas.GetTop(SelectedElement.Element));
+                Point bottomRight = new Point(topLeft.X + width, topLeft.Y + height);
+
+                // apply the rotation to the corner points
+                topLeft = rightRotate.Transform(topLeft);
+                bottomRight = rightRotate.Transform(bottomRight);
+
+                // update positions of the adorner thumb
+                Canvas.SetLeft(Adorner.Thumb, bottomRight.X);
+                Canvas.SetTop(Adorner.Thumb, bottomRight.Y);
+
+                // update the adorner visuals
+                Adorner.Border.Arrange(new Rect(-2.5, -2.5, width + 5, height + 5));
+                Adorner.Thumb.Arrange(new Rect(width - 5, height - 5, 10, 10));
+
                 UpdateMemento();
 
                 DrawingCanvas.Children.Clear();
@@ -525,6 +541,22 @@ namespace PaintApp
                 transformGroup.Children.Add(flip);
 
                 SelectedElement.Element.RenderTransform = transformGroup;
+
+                // update positions of top-left and bottom-right thumbs
+                Point topLeft = new Point(Canvas.GetLeft(SelectedElement.Element), Canvas.GetTop(SelectedElement.Element));
+                Point bottomRight = new Point(topLeft.X + width, topLeft.Y + height);
+
+                // apply the rotation to the corner points
+                topLeft = leftRotate.Transform(topLeft);
+                bottomRight = leftRotate.Transform(bottomRight);
+
+                // update positions of the adorner thumb
+                Canvas.SetLeft(Adorner.Thumb, bottomRight.X);
+                Canvas.SetTop(Adorner.Thumb, bottomRight.Y);
+
+                // update the adorner visuals
+                Adorner.Border.Arrange(new Rect(-2.5, -2.5, width + 5, height + 5));
+                Adorner.Thumb.Arrange(new Rect(width - 5, height - 5, 10, 10));
 
                 UpdateMemento();
 
@@ -578,6 +610,22 @@ namespace PaintApp
 
                 SelectedElement.Element.RenderTransform = transformGroup;
 
+                // update positions of top-left and bottom-right thumbs
+                Point topLeft = new Point(Canvas.GetLeft(SelectedElement.Element), Canvas.GetTop(SelectedElement.Element));
+                Point bottomRight = new Point(topLeft.X + width, topLeft.Y + height);
+
+                // apply the transformation to the corner points
+                topLeft = transformGroup.Transform(topLeft);
+                bottomRight = transformGroup.Transform(bottomRight);
+
+                // update positions of the adorner thumb
+                Canvas.SetLeft(Adorner.Thumb, bottomRight.X);
+                Canvas.SetTop(Adorner.Thumb, bottomRight.Y);
+
+                // update the adorner visuals
+                Adorner.Border.Arrange(new Rect(-2.5, -2.5, width + 5, height + 5));
+                Adorner.Thumb.Arrange(new Rect(width - 5, height - 5, 10, 10));
+
                 UpdateMemento();
 
                 DrawingCanvas.Children.Clear();
@@ -629,6 +677,22 @@ namespace PaintApp
                 transformGroup.Children.Add(flip);
 
                 SelectedElement.Element.RenderTransform = transformGroup;
+
+                // update positions of top-left and bottom-right thumbs
+                Point topLeft = new Point(Canvas.GetLeft(SelectedElement.Element), Canvas.GetTop(SelectedElement.Element));
+                Point bottomRight = new Point(topLeft.X + width, topLeft.Y + height);
+
+                // apply the transformation to the corner points
+                topLeft = transformGroup.Transform(topLeft);
+                bottomRight = transformGroup.Transform(bottomRight);
+
+                // update positions of the adorner thumb
+                Canvas.SetLeft(Adorner.Thumb, bottomRight.X);
+                Canvas.SetTop(Adorner.Thumb, bottomRight.Y);
+
+                // update the adorner visuals
+                Adorner.Border.Arrange(new Rect(-2.5, -2.5, width + 5, height + 5));
+                Adorner.Thumb.Arrange(new Rect(width - 5, height - 5, 10, 10));
 
                 UpdateMemento();
 
