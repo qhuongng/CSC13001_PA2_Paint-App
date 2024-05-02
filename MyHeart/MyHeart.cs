@@ -129,7 +129,7 @@ namespace MyHeart
             heartPath.Fill = _fill;
             heartPath.Stroke = _stroke;
             heartPath.StrokeThickness = _strokeWidth;
-            heartPath.StrokeDashArray = new DoubleCollection(_strokeDashArray ?? new double[] { });
+            heartPath.StrokeDashArray = new DoubleCollection(_strokeDashArray ?? []);
             heartPath.StrokeLineJoin = PenLineJoin.Round;
             heartPath.Data = heartGeometry;
 
