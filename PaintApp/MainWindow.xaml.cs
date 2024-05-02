@@ -858,6 +858,7 @@ namespace PaintApp
                         break;
                 }
 
+                ElementTb.CaretIndex = ElementTb.Text.Length;
                 ElementTb.Focus();
             }
         }
@@ -992,6 +993,45 @@ namespace PaintApp
                 else
                 {
                     target.TextDecorations = null;
+                }
+            }
+        }
+
+        void AlignmentBtn_Checked(object sender, RoutedEventArgs e)
+        {
+            var rb = sender as RadioButton;
+
+            if (SelectedElement == null)
+            {
+                return;
+            }
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                switch (rb.Name)
+                {
+                    case "BtnLeft":
+                        target.TextAlignment = TextAlignment.Left;
+                        break;
+                    case "BtnRight":
+                        target.TextAlignment = TextAlignment.Right;
+                        break;
+                    case "BtnCenter":
+                        target.TextAlignment = TextAlignment.Center;
+                        break;
+                    default:
+                        target.TextAlignment = TextAlignment.Left;
+                        break;
                 }
             }
         }
