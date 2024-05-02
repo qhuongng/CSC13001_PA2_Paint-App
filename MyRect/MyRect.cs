@@ -113,6 +113,7 @@ namespace MyRect
             tb.Foreground = Brushes.Black;
             tb.HorizontalAlignment = HorizontalAlignment.Center;
             tb.VerticalAlignment = VerticalAlignment.Center;
+            tb.Margin = new Thickness(0);
 
             // create a container Grid to hold the rectangle
             Grid container = new Grid();
