@@ -1,7 +1,12 @@
-﻿using Shapes;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
+using Shapes;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Net.Http.Json;
 using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -13,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
 using System.Xml.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
@@ -40,6 +46,23 @@ namespace PaintApp
             Element = element;
             ElementName = name;
             ElementIcon = icon;
+        }
+
+        public ShapeElement Clone()
+        {
+            MemoryStream stream = new MemoryStream();
+
+            XamlWriter.Save(Element, stream);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
+            clonedElement.RenderSize = Element.RenderSize;
+
+            Canvas.SetTop(clonedElement, Canvas.GetTop(Element));
+            Canvas.SetLeft(clonedElement, Canvas.GetLeft(Element));
+
+            ShapeElement shapeElement = new ShapeElement(clonedElement,ElementName,ElementIcon);
+            return shapeElement;
         }
 
         public ShapeElementMemento createMemento()
@@ -108,7 +131,7 @@ namespace PaintApp
     {
         public List<ShapeElementMemento> HistoryMemento = new List<ShapeElementMemento>();
         public Dictionary<int, string> RemoveMemento = new Dictionary<int, string>();
-      
+        
         public void AddMemento(ShapeElementMemento memento) 
         { 
             HistoryMemento.Add(memento);
@@ -135,6 +158,7 @@ namespace PaintApp
         bool _isDragging = false;
         bool _justEditedText = false;
         bool _isSelectArea = false;
+        bool _isSaved = false;
 
         Point _start;
         Point _end;
@@ -157,8 +181,9 @@ namespace PaintApp
 
         public ObservableCollection<double> FontSizes { get; set; }
 
+        public Dictionary<string, ObservableCollection<ShapeElement>> layerList;
         public ObservableCollection<ShapeElement> ShapeList { get; set; }
-
+        
         public ShapeElement SelectedElement { get; set; }
 
         ShapeElement _prevSelectedElement = null;
@@ -172,6 +197,7 @@ namespace PaintApp
         public int RotateCorner = 0;
         public int FlipHorizontal = 1;
         public int FlipVertical = 1;
+        public string SaveFilePath;
 
         public Dictionary<string, int> indexShape = new Dictionary<string, int>
         {
@@ -195,8 +221,12 @@ namespace PaintApp
             StrokeTypes = new ObservableCollection<BitmapImage> { solid, dash, dash_dot };
             StrokeType = StrokeTypes[0];
 
+            layerList = new Dictionary<string, ObservableCollection<ShapeElement>>();
+
             ShapeList = new ObservableCollection<ShapeElement>();
             CareTaker = new CareTakerShape();
+
+            layerList.Add("abc", ShapeList);
 
             BtnRedo.IsEnabled = false;
             iconRedo.Foreground = Brushes.Gray;
@@ -294,6 +324,10 @@ namespace PaintApp
             {
                 Cut_Click(null, null);
             }
+            if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                SaveFile_Click(null, null);
+            }
         }
 
         private void Canvas_KeyUp(object sender, KeyEventArgs e)
@@ -302,6 +336,112 @@ namespace PaintApp
             {
                 _painter.SetShiftState(false);
             }
+        }
+
+
+        private void NewFile_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+
+        private void OpenFile_Click(object sender, RoutedEventArgs e)
+        {
+            if(!_isSaved)
+            {
+                MessageBoxResult result = MessageBox.Show("Do you want to save the changes ? ", "Save Changes", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveFile_Click(null,null);
+                } else
+                {
+                    OpenFileDialog openFileDialog = new OpenFileDialog();
+                    openFileDialog.Title = "Open Paint";
+                    openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+
+                    if(openFileDialog.ShowDialog() == true)
+                    {
+                        try
+                        {
+                            string json = File.ReadAllText(openFileDialog.FileName);
+                            SaveFilePath = openFileDialog.FileName;
+                            //layerList = (Dictionary<string, ObservableCollection<ShapeElement>>)JsonConvert.DeserializeObject(json);
+                            //ShapeList = layerList["abc"];
+                            ShapeList = (ObservableCollection<ShapeElement>)JsonConvert.DeserializeObject(json);
+                            DrawingCanvas.Children.Clear();
+                            foreach (var shape in ShapeList)
+                            {
+                                DrawingCanvas.Children.Add(shape.Element);
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error: " + ex.Message);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void SaveFile_Click(object sender, RoutedEventArgs e)
+        {
+            if(SaveFilePath == null || SaveFilePath.Equals(""))
+            {
+                if(ShapeList.Count == 0)
+                {
+                    MessageBox.Show("Nothing to save");
+                } else
+                {
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.Title = "Save Paint";
+                    saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                    saveFileDialog.FilterIndex = 1;
+                    saveFileDialog.RestoreDirectory = true;
+
+                    if (saveFileDialog.ShowDialog() == true)
+                    {
+                        string filePath = saveFileDialog.FileName;
+                        SaveFilePath = filePath;
+                        _isSaved = true;
+                        foreach(var kvp in layerList)
+                        {
+                            foreach(ShapeElement shape in kvp.Value)
+                            {
+                                MemoryStream stream = new MemoryStream();
+
+                                XamlWriter.Save(shape.Element, stream);
+                                stream.Seek(0, SeekOrigin.Begin);
+
+                                UIElement clonedElement = (UIElement)XamlReader.Load(stream);
+                                clonedElement.RenderSize = shape.Element.RenderSize;
+                                
+                                Canvas.SetTop(clonedElement, Canvas.GetTop(shape.Element));
+                                Canvas.SetLeft(clonedElement, Canvas.GetLeft(shape.Element));
+                                shape.Element = clonedElement;
+                            }
+                        }
+                        string json = JsonConvert.SerializeObject(layerList,
+                            new JsonSerializerSettings
+                            {
+                                TypeNameHandling = TypeNameHandling.Objects
+                            });
+                        File.WriteAllText(filePath, json);
+                    }
+                }
+            } else 
+            {
+                if (_isSaved == false)
+                {
+                    string json = JsonConvert.SerializeObject(layerList);
+                    File.WriteAllText(SaveFilePath, json);
+                }
+            }
+        }
+
+        private void SaveAsFile_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void UndoBtn_Click(object sender, RoutedEventArgs e)
@@ -1172,8 +1312,6 @@ namespace PaintApp
                     _visual.Visibility = Visibility.Hidden;
                     RenderTargetBitmap rtb = new RenderTargetBitmap((int)DrawingCanvas.ActualWidth, (int)DrawingCanvas.ActualHeight, 96, 96, PixelFormats.Pbgra32);
                     rtb.Render(DrawingCanvas);
-
-                    // Xác định vùng cần cắt
 
                     // Cắt phần cần thiết từ hình ảnh
                     CroppedBitmap croppedBitmap = new CroppedBitmap(rtb, new Int32Rect((int)_start.X, (int)_start.Y, (int)width, (int)height));

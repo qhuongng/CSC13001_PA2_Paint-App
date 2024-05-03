@@ -20,11 +20,11 @@
                 <Border BorderBrush="#9D9D9D" BorderThickness="0,0,1,0">
                     <Menu>
                         <MenuItem Header="_File">
-                            <MenuItem Header="_New" InputGestureText="Ctrl+N" />
-                            <MenuItem Header="_Open..." InputGestureText="Ctrl+O" />
+                            <MenuItem Header="_New" InputGestureText="Ctrl+N" Click="NewFile_Click"/>
+                            <MenuItem Header="_Open..." InputGestureText="Ctrl+O" Click="OpenFile_Click" />
                             <Separator />
-                            <MenuItem Header="_Save" InputGestureText="Ctrl+S" />
-                            <MenuItem Header="_Save as..." InputGestureText="Ctrl+Shift+X" />
+                            <MenuItem Header="_Save" InputGestureText="Ctrl+S" Click="SaveFile_Click"/>
+                            <MenuItem Header="_Save as..." InputGestureText="Ctrl+Shift+X" Click="SaveAsFile_Click"/>
                             <Separator />
                             <MenuItem Header="_Quit" InputGestureText="Alt+F4" Click="Quit_Click"/>
                         </MenuItem>
