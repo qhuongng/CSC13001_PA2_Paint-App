@@ -5,11 +5,14 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
@@ -131,6 +134,7 @@ namespace PaintApp
         bool _isDrawing = false;
         bool _isDragging = false;
         bool _justEditedText = false;
+        bool _isSelectArea = false;
 
         Point _start;
         Point _end;
@@ -155,11 +159,12 @@ namespace PaintApp
 
         public ObservableCollection<ShapeElement> ShapeList { get; set; }
 
-        ShapeElement _selectedElement = null;
+        public ShapeElement SelectedElement { get; set; }
+
         ShapeElement _prevSelectedElement = null;
         ShapeElement _copyElement = null;
 
-        Rectangle _selectionBounds = null;
+        public ResizeAdorner Adorner { get; set; }
 
         public CareTakerShape CareTaker;
         public int CurrentPosition = -1;
@@ -204,6 +209,8 @@ namespace PaintApp
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            Application.Current.MainWindow = this;
+
             string folder = AppDomain.CurrentDomain.BaseDirectory;
             var fis = new DirectoryInfo(folder).GetFiles("*.dll");
 
@@ -239,7 +246,7 @@ namespace PaintApp
                         Width = 36,
                         Height = 36,
                         Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.White), Width = 24, Height = 24 },
-                        Style = System.Windows.Application.Current.Resources["IconRadioButtonStyle"] as Style,
+                        Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
                         GroupName = "CtrlBtn",
                         Tag = item,
                     };
@@ -435,7 +442,7 @@ namespace PaintApp
         
         private void RotateRightBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
                 if (RotateCorner == 360)
                 {
@@ -451,8 +458,8 @@ namespace PaintApp
                 flip.ScaleY = FlipVertical;
                 flip.ScaleX = FlipHorizontal;
 
-                double width = _selectedElement.Element.RenderSize.Width;
-                double height = _selectedElement.Element.RenderSize.Height;
+                double width = SelectedElement.Element.RenderSize.Width;
+                double height = SelectedElement.Element.RenderSize.Height;
 
                 // Tính toán tâm
                 double centerX = width / 2;
@@ -469,7 +476,23 @@ namespace PaintApp
                 transformGroup.Children.Add(rightRotate);
                 transformGroup.Children.Add(flip);
 
-                _selectedElement.Element.RenderTransform = transformGroup;
+                SelectedElement.Element.RenderTransform = transformGroup;
+
+                // update positions of top-left and bottom-right thumbs
+                Point topLeft = new Point(Canvas.GetLeft(SelectedElement.Element), Canvas.GetTop(SelectedElement.Element));
+                Point bottomRight = new Point(topLeft.X + width, topLeft.Y + height);
+
+                // apply the rotation to the corner points
+                topLeft = rightRotate.Transform(topLeft);
+                bottomRight = rightRotate.Transform(bottomRight);
+
+                // update positions of the adorner thumb
+                Canvas.SetLeft(Adorner.Thumb, bottomRight.X);
+                Canvas.SetTop(Adorner.Thumb, bottomRight.Y);
+
+                // update the adorner visuals
+                Adorner.Border.Arrange(new Rect(-2.5, -2.5, width + 5, height + 5));
+                Adorner.Thumb.Arrange(new Rect(width - 5, height - 5, 10, 10));
 
                 UpdateMemento();
 
@@ -486,7 +509,7 @@ namespace PaintApp
 
         private void RotateLeftBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
                 if (RotateCorner == -360)
                 {
@@ -502,8 +525,8 @@ namespace PaintApp
                 flip.ScaleY = FlipVertical;
                 flip.ScaleX = FlipHorizontal;
 
-                double width = _selectedElement.Element.RenderSize.Width;
-                double height = _selectedElement.Element.RenderSize.Height;
+                double width = SelectedElement.Element.RenderSize.Width;
+                double height = SelectedElement.Element.RenderSize.Height;
 
                 // Tính toán tâm
                 double centerX = width / 2;
@@ -520,7 +543,23 @@ namespace PaintApp
                 transformGroup.Children.Add(leftRotate);
                 transformGroup.Children.Add(flip);
 
-                _selectedElement.Element.RenderTransform = transformGroup;
+                SelectedElement.Element.RenderTransform = transformGroup;
+
+                // update positions of top-left and bottom-right thumbs
+                Point topLeft = new Point(Canvas.GetLeft(SelectedElement.Element), Canvas.GetTop(SelectedElement.Element));
+                Point bottomRight = new Point(topLeft.X + width, topLeft.Y + height);
+
+                // apply the rotation to the corner points
+                topLeft = leftRotate.Transform(topLeft);
+                bottomRight = leftRotate.Transform(bottomRight);
+
+                // update positions of the adorner thumb
+                Canvas.SetLeft(Adorner.Thumb, bottomRight.X);
+                Canvas.SetTop(Adorner.Thumb, bottomRight.Y);
+
+                // update the adorner visuals
+                Adorner.Border.Arrange(new Rect(-2.5, -2.5, width + 5, height + 5));
+                Adorner.Thumb.Arrange(new Rect(width - 5, height - 5, 10, 10));
 
                 UpdateMemento();
 
@@ -537,7 +576,7 @@ namespace PaintApp
 
         private void FlipHorizontalBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
                 if (FlipHorizontal == 1)
                 {
@@ -555,8 +594,8 @@ namespace PaintApp
                 RotateTransform rotate = new RotateTransform();
                 rotate.Angle = RotateCorner;
 
-                double width = _selectedElement.Element.RenderSize.Width;
-                double height = _selectedElement.Element.RenderSize.Height;
+                double width = SelectedElement.Element.RenderSize.Width;
+                double height = SelectedElement.Element.RenderSize.Height;
 
                 // Tính toán tâm
                 double centerX = width / 2;
@@ -572,7 +611,23 @@ namespace PaintApp
                 transformGroup.Children.Add(rotate);
                 transformGroup.Children.Add(flip);
 
-                _selectedElement.Element.RenderTransform = transformGroup;
+                SelectedElement.Element.RenderTransform = transformGroup;
+
+                // update positions of top-left and bottom-right thumbs
+                Point topLeft = new Point(Canvas.GetLeft(SelectedElement.Element), Canvas.GetTop(SelectedElement.Element));
+                Point bottomRight = new Point(topLeft.X + width, topLeft.Y + height);
+
+                // apply the transformation to the corner points
+                topLeft = transformGroup.Transform(topLeft);
+                bottomRight = transformGroup.Transform(bottomRight);
+
+                // update positions of the adorner thumb
+                Canvas.SetLeft(Adorner.Thumb, bottomRight.X);
+                Canvas.SetTop(Adorner.Thumb, bottomRight.Y);
+
+                // update the adorner visuals
+                Adorner.Border.Arrange(new Rect(-2.5, -2.5, width + 5, height + 5));
+                Adorner.Thumb.Arrange(new Rect(width - 5, height - 5, 10, 10));
 
                 UpdateMemento();
 
@@ -589,7 +644,7 @@ namespace PaintApp
 
         private void FlipVerticalBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
                 if (FlipVertical == 1)
                 {
@@ -607,8 +662,8 @@ namespace PaintApp
                 RotateTransform rotate = new RotateTransform();
                 rotate.Angle = RotateCorner;
 
-                double width = _selectedElement.Element.RenderSize.Width;
-                double height = _selectedElement.Element.RenderSize.Height;
+                double width = SelectedElement.Element.RenderSize.Width;
+                double height = SelectedElement.Element.RenderSize.Height;
 
                 // Tính toán tâm
                 double centerX = width / 2;
@@ -624,7 +679,23 @@ namespace PaintApp
                 transformGroup.Children.Add(rotate);
                 transformGroup.Children.Add(flip);
 
-                _selectedElement.Element.RenderTransform = transformGroup;
+                SelectedElement.Element.RenderTransform = transformGroup;
+
+                // update positions of top-left and bottom-right thumbs
+                Point topLeft = new Point(Canvas.GetLeft(SelectedElement.Element), Canvas.GetTop(SelectedElement.Element));
+                Point bottomRight = new Point(topLeft.X + width, topLeft.Y + height);
+
+                // apply the transformation to the corner points
+                topLeft = transformGroup.Transform(topLeft);
+                bottomRight = transformGroup.Transform(bottomRight);
+
+                // update positions of the adorner thumb
+                Canvas.SetLeft(Adorner.Thumb, bottomRight.X);
+                Canvas.SetTop(Adorner.Thumb, bottomRight.Y);
+
+                // update the adorner visuals
+                Adorner.Border.Arrange(new Rect(-2.5, -2.5, width + 5, height + 5));
+                Adorner.Thumb.Arrange(new Rect(width - 5, height - 5, 10, 10));
 
                 UpdateMemento();
 
@@ -652,14 +723,14 @@ namespace PaintApp
             }
 
             // shapes consist of Path(s) and a TextBlock wrapped inside a Grid
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
                 // if the user is editing the shape's text, change the textblock's background color
                 if (TextPanel.Visibility == Visibility.Visible)
                 {
                     TextBlock target = null;
 
-                    foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+                    foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
                     {
                         if (child is TextBlock)
                         {
@@ -675,7 +746,7 @@ namespace PaintApp
                 else
                 {
                     // find all Paths that are children of the grid and modify their colors
-                    foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                    foreach (UIElement child in (SelectedElement.Element as Grid).Children)
                     {
                         if (child is System.Windows.Shapes.Path)
                         {
@@ -713,13 +784,13 @@ namespace PaintApp
                 _painter.SetStrokeColor((SolidColorBrush)StrokeClr.Background);
             }
 
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
                 if (TextPanel.Visibility == Visibility.Visible)
                 {
                     TextBlock target = null;
 
-                    foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+                    foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
                     {
                         if (child is TextBlock)
                         {
@@ -734,7 +805,7 @@ namespace PaintApp
                 }
                 else
                 {
-                    foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                    foreach (UIElement child in (SelectedElement.Element as Grid).Children)
                     {
                         if (child is System.Windows.Shapes.Path)
                         {
@@ -770,7 +841,29 @@ namespace PaintApp
             _painter.SetStrokeWidth(StrokeWidth);
             _painter.SetStrokeDashArray(BitmapToDashArray(StrokeType));
 
-            DrawingCanvas.Children.Remove(_selectionBounds);
+            if (Adorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
+            
+            SelectionPane.UnselectAll();
+            SetSelected(false);
+
+            CanvasHelper.Visibility = Visibility.Visible;
+        }
+
+        private void SelectAreaBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _isSelectArea = true;
+            _painter = _prototypes.FirstOrDefault(x => x.Name.Equals("Rectangle"));
+            _painter.SetStrokeColor(new SolidColorBrush(Colors.Red));
+            _painter.SetStrokeWidth(1);
+            _painter.SetStrokeDashArray(new Double[] {5,2});
+
+            if (Adorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
             SelectionPane.UnselectAll();
             SetSelected(false);
 
@@ -785,7 +878,7 @@ namespace PaintApp
 
         private void TextBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedElement == null)
+            if (SelectedElement == null || SelectedElement.ElementName.Contains("Line"))
             {
                 return;
             }
@@ -796,7 +889,7 @@ namespace PaintApp
 
             TextBlock target = null;
 
-            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
             {
                 if (child is TextBlock)
                 {
@@ -850,6 +943,7 @@ namespace PaintApp
                         break;
                 }
 
+                ElementTb.CaretIndex = ElementTb.Text.Length;
                 ElementTb.Focus();
             }
         }
@@ -861,14 +955,14 @@ namespace PaintApp
 
         private void ElementTb_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (_selectedElement == null)
+            if (SelectedElement == null)
             {
                 return;
             }
 
             TextBlock target = null;
 
-            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
             {
                 if (child is TextBlock)
                 {
@@ -896,14 +990,14 @@ namespace PaintApp
         {
             ToggleButton tb = sender as ToggleButton;
 
-            if (_selectedElement == null)
+            if (SelectedElement == null)
             {
                 return;
             }
 
             TextBlock target = null;
 
-            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
             {
                 if (child is TextBlock)
                 {
@@ -928,14 +1022,14 @@ namespace PaintApp
         {
             ToggleButton tb = sender as ToggleButton;
 
-            if (_selectedElement == null)
+            if (SelectedElement == null)
             {
                 return;
             }
 
             TextBlock target = null;
 
-            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
             {
                 if (child is TextBlock)
                 {
@@ -960,14 +1054,14 @@ namespace PaintApp
         {
             ToggleButton tb = sender as ToggleButton;
 
-            if (_selectedElement == null)
+            if (SelectedElement == null)
             {
                 return;
             }
 
             TextBlock target = null;
 
-            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
             {
                 if (child is TextBlock)
                 {
@@ -988,6 +1082,45 @@ namespace PaintApp
             }
         }
 
+        void AlignmentBtn_Checked(object sender, RoutedEventArgs e)
+        {
+            var rb = sender as RadioButton;
+
+            if (SelectedElement == null)
+            {
+                return;
+            }
+
+            TextBlock target = null;
+
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
+            {
+                if (child is TextBlock)
+                {
+                    target = child as TextBlock;
+                }
+            }
+
+            if (target != null)
+            {
+                switch (rb.Name)
+                {
+                    case "BtnLeft":
+                        target.TextAlignment = TextAlignment.Left;
+                        break;
+                    case "BtnRight":
+                        target.TextAlignment = TextAlignment.Right;
+                        break;
+                    case "BtnCenter":
+                        target.TextAlignment = TextAlignment.Center;
+                        break;
+                    default:
+                        target.TextAlignment = TextAlignment.Left;
+                        break;
+                }
+            }
+        }
+
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (_painter != null)
@@ -996,7 +1129,11 @@ namespace PaintApp
                 _isDrawing = true;
                 _start = e.GetPosition(DrawingCanvas);
 
-                DrawingCanvas.Children.Remove(_selectionBounds);
+                if (Adorner != null)
+                {
+                    AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+                }
+                
                 SelectionPane.UnselectAll();
                 SetSelected(false);
             }
@@ -1027,40 +1164,60 @@ namespace PaintApp
             if (_painter != null)
             {
                 _isDrawing = false;
-
-                IShape clone = (IShape)_painter.Clone();
-                int index = indexShape[clone.Name];
-
-                if (index == 0)
+                if(_isSelectArea)
                 {
-                    ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon);
-                    indexShape[clone.Name] = 1;
-                    ShapeList.Add(newShape);
-                }
-                else
+                    double width = (double)(_visual.RenderSize.Width);
+                    double height = (double)(_visual.RenderSize.Height);
+
+                    _visual.Visibility = Visibility.Hidden;
+                    RenderTargetBitmap rtb = new RenderTargetBitmap((int)DrawingCanvas.ActualWidth, (int)DrawingCanvas.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                    rtb.Render(DrawingCanvas);
+
+                    // Xác định vùng cần cắt
+
+                    // Cắt phần cần thiết từ hình ảnh
+                    CroppedBitmap croppedBitmap = new CroppedBitmap(rtb, new Int32Rect((int)_start.X, (int)_start.Y, (int)width, (int)height));
+
+                    // Gắn hình ảnh vào clipboard
+                    Clipboard.SetImage(croppedBitmap);
+
+                    DrawingCanvas.Children.Remove(_visual);
+                } else
                 {
-                    ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
-                    indexShape[clone.Name] += 1;
-                    ShapeList.Add(newShape);
+                    IShape clone = (IShape)_painter.Clone();
+                    int index = indexShape[clone.Name];
+
+                    if (index == 0)
+                    {
+                        ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon);
+                        indexShape[clone.Name] = 1;
+                        ShapeList.Add(newShape);
+                    }
+                    else
+                    {
+                        ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
+                        indexShape[clone.Name] += 1;
+                        ShapeList.Add(newShape);
+                    }
+
+                    SelectionPane.SelectedItem = ShapeList.Last();
+
+                    SetSelected(false);
+                    UpdateMemento();
                 }
-
-                SelectionPane.SelectedItem = ShapeList.Last();
-
-                SetSelected(false);
-                UpdateMemento();
             }
         }
 
         private void FontCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_selectedElement == null)
+            if (SelectedElement == null)
             {
                 return;
             }
 
             TextBlock target = null;
 
-            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
             {
                 if (child is TextBlock)
                 {
@@ -1076,14 +1233,14 @@ namespace PaintApp
 
         private void FontSizeCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_selectedElement == null)
+            if (SelectedElement == null)
             {
                 return;
             }
 
             TextBlock target = null;
 
-            foreach (UIElement child in ((Grid)_selectedElement.Element).Children)
+            foreach (UIElement child in ((Grid)SelectedElement.Element).Children)
             {
                 if (child is TextBlock)
                 {
@@ -1111,15 +1268,15 @@ namespace PaintApp
                     _painter.SetStrokeWidth(StrokeWidth);
                 }
 
-                if (_selectedElement != null)
+                if (SelectedElement != null)
                 {
-                    if (_selectedElement.Element is Shape)
+                    if (SelectedElement.Element is Shape)
                     {
-                        (_selectedElement.Element as Shape).StrokeThickness = StrokeWidth;
+                        (SelectedElement.Element as Shape).StrokeThickness = StrokeWidth;
                     }
-                    else if (_selectedElement.Element is Grid)
+                    else if (SelectedElement.Element is Grid)
                     {
-                        Grid element = _selectedElement.Element as Grid;
+                        Grid element = SelectedElement.Element as Grid;
 
                         // custom shapes consists of Path(s) wrapped inside a Grid
                         // find all Paths that are child of the grid and modify their colors
@@ -1180,7 +1337,7 @@ namespace PaintApp
                     _painter.SetStrokeDashArray(BitmapToDashArray(StrokeType));
                 }
 
-                if (_selectedElement != null)
+                if (SelectedElement != null)
                 {
                     DoubleCollection newParam = new DoubleCollection(0);
 
@@ -1189,15 +1346,15 @@ namespace PaintApp
                         newParam = new DoubleCollection(BitmapToDashArray(StrokeType));
                     }
 
-                    if (_selectedElement.Element is Shape)
+                    if (SelectedElement.Element is Shape)
                     {
-                        (_selectedElement.Element as Shape).StrokeDashArray = newParam;
+                        (SelectedElement.Element as Shape).StrokeDashArray = newParam;
                     }
-                    else if (_selectedElement.Element is Grid)
+                    else if (SelectedElement.Element is Grid)
                     {
                         // custom shapes consists of Path(s) wrapped inside a Grid
                         // find all Paths that are child of the grid and modify their colors
-                        foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                        foreach (UIElement child in (SelectedElement.Element as Grid).Children)
                         {
                             if (child is System.Windows.Shapes.Path)
                             {
@@ -1224,7 +1381,7 @@ namespace PaintApp
             }
         }
 
-        private double[] BitmapToDashArray(BitmapImage image)
+        public double[] BitmapToDashArray(BitmapImage image)
         {
             Uri uri = image.UriSource;
             string fileName = System.IO.Path.GetFileName(uri.LocalPath);
@@ -1268,7 +1425,10 @@ namespace PaintApp
             _isDragging = true;
             _dragStart = Mouse.GetPosition(DrawingCanvas);
 
-            DrawingCanvas.Children.Remove(_selectionBounds);
+            if (Adorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
 
             (sender as UIElement).CaptureMouse();
         }
@@ -1284,8 +1444,8 @@ namespace PaintApp
                 double left = Canvas.GetLeft(draggedElement);
                 double top = Canvas.GetTop(draggedElement);
 
-                Canvas.SetLeft(_selectedElement.Element, left + (newPoint.X - _dragStart.X));
-                Canvas.SetTop(_selectedElement.Element, top + (newPoint.Y - _dragStart.Y));
+                Canvas.SetLeft(SelectedElement.Element, left + (newPoint.X - _dragStart.X));
+                Canvas.SetTop(SelectedElement.Element, top + (newPoint.Y - _dragStart.Y));
 
                 _dragStart = newPoint;
             }
@@ -1304,32 +1464,18 @@ namespace PaintApp
 
         private void BoundSelectedElement()
         {
-            DrawingCanvas.Children.Remove(_selectionBounds);
-
-            if (_selectedElement == null)
+            if (SelectedElement == null)
             {
                 return;
             }
 
-            Size elemSize = _selectedElement.Element.RenderSize;
-
-            // get the position of the element relative to its parent container
-            Point elemLoc = _selectedElement.Element.TranslatePoint(new Point(0, 0), DrawingCanvas);
-
-            _selectionBounds = new Rectangle
+            if (Adorner != null)
             {
-                Width = elemSize.Width + 2,
-                Height = elemSize.Height + 2,
-                Stroke = Brushes.Red,
-                StrokeThickness = 1,
-                StrokeDashArray = new DoubleCollection([4, 2])
-            };
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
 
-            // set the position of the selection bounds based on the translated coordinates
-            Canvas.SetLeft(_selectionBounds, elemLoc.X - 1);
-            Canvas.SetTop(_selectionBounds, elemLoc.Y - 1);
-
-            DrawingCanvas.Children.Add(_selectionBounds);
+            Adorner = new ResizeAdorner(SelectedElement.Element);
+            AdornerLayer.GetAdornerLayer(DrawingCanvas).Add(Adorner);
         }
 
         private void SelectionPane_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1345,7 +1491,7 @@ namespace PaintApp
                 _justEditedText = false;
             }
 
-            _prevSelectedElement = _selectedElement;
+            _prevSelectedElement = SelectedElement;
 
             if (_prevSelectedElement != null)
             {
@@ -1354,28 +1500,28 @@ namespace PaintApp
                 _prevSelectedElement.Element.MouseUp -= Element_MouseUp;
             }
 
-            _selectedElement = (ShapeElement)SelectionPane.SelectedItem;
+            SelectedElement = (ShapeElement)SelectionPane.SelectedItem;
 
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
-                _selectedElement.Element.MouseDown += Element_MouseDown;
-                _selectedElement.Element.MouseMove += Element_MouseMove;
-                _selectedElement.Element.MouseUp += Element_MouseUp;
+                SelectedElement.Element.MouseDown += Element_MouseDown;
+                SelectedElement.Element.MouseMove += Element_MouseMove;
+                SelectedElement.Element.MouseUp += Element_MouseUp;
 
                 BoundSelectedElement();
 
-                if (_selectedElement.Element is Shape)
+                if (SelectedElement.Element is Shape)
                 {
-                    FillClr.Background = (_selectedElement.Element as Shape).Fill;
-                    StrokeClr.Background = (_selectedElement.Element as Shape).Stroke;
-                    StrokeWidthCb.SelectedItem = (_selectedElement.Element as Shape).StrokeThickness;
+                    FillClr.Background = (SelectedElement.Element as Shape).Fill;
+                    StrokeClr.Background = (SelectedElement.Element as Shape).Stroke;
+                    StrokeWidthCb.SelectedItem = (SelectedElement.Element as Shape).StrokeThickness;
 
-                    DashArrayToBitmap((_selectedElement.Element as Shape).StrokeDashArray);
+                    DashArrayToBitmap((SelectedElement.Element as Shape).StrokeDashArray);
 
                 }
-                else if (_selectedElement.Element is Grid)
+                else if (SelectedElement.Element is Grid)
                 {
-                    foreach (UIElement child in (_selectedElement.Element as Grid).Children)
+                    foreach (UIElement child in (SelectedElement.Element as Grid).Children)
                     {
                         if (child is System.Windows.Shapes.Path)
                         {
@@ -1405,8 +1551,16 @@ namespace PaintApp
                     MoveBtn_Click(null, null);
                 }
 
-                BtnText.IsEnabled = true;
-                iconText.Foreground = Brushes.White;
+                if (!SelectedElement.ElementName.Contains("Line"))
+                {
+                    BtnText.IsEnabled = true;
+                    iconText.Foreground = Brushes.White;
+                }
+                else
+                {
+                    BtnText.IsEnabled = false;
+                    iconText.Foreground = Brushes.Gray;
+                }
             }
             else
             {
@@ -1417,7 +1571,7 @@ namespace PaintApp
 
         private void SetPrevSelected()
         {
-            _prevSelectedElement = _selectedElement;
+            _prevSelectedElement = SelectedElement;
 
             if (_prevSelectedElement != null)
             {
@@ -1427,7 +1581,7 @@ namespace PaintApp
             }
         }
 
-        private void UpdateMemento()
+        public void UpdateMemento()
         {
             if (CurrentPosition < CareTaker.HistoryMemento.Count - 1)
             {
@@ -1437,7 +1591,7 @@ namespace PaintApp
                 }
             }
 
-            CareTaker.AddMemento(_selectedElement.createMemento());
+            CareTaker.AddMemento(SelectedElement.createMemento());
             CurrentPosition++;
 
             if (BtnRedo.IsEnabled == true)
@@ -1459,45 +1613,45 @@ namespace PaintApp
 
         private void Copy_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
                 MemoryStream stream = new MemoryStream();
-                XamlWriter.Save(_selectedElement.Element, stream);
+                XamlWriter.Save(SelectedElement.Element, stream);
 
                 stream.Seek(0, SeekOrigin.Begin);
 
                 UIElement clonedElement = (UIElement)XamlReader.Load(stream);
-                string[] name = _selectedElement.ElementName.Split(' ');
+                string[] name = SelectedElement.ElementName.Split(' ');
 
                 if (name.Length == 2)
                 {
                     if (name[0].Equals("Rounded"))
                     {
-                        _copyElement = new ShapeElement(clonedElement, name[0] + ' ' + name[1], _selectedElement.ElementIcon);
+                        _copyElement = new ShapeElement(clonedElement, name[0] + ' ' + name[1], SelectedElement.ElementIcon);
                     } else
                     {
-                        _copyElement = new ShapeElement(clonedElement, name[0], _selectedElement.ElementIcon);
+                        _copyElement = new ShapeElement(clonedElement, name[0], SelectedElement.ElementIcon);
                     }
                 } 
                 else if (name.Length == 1)
                 {
-                    _copyElement = new ShapeElement(clonedElement, name[0], _selectedElement.ElementIcon);
+                    _copyElement = new ShapeElement(clonedElement, name[0], SelectedElement.ElementIcon);
                 }
                 else
                 {
-                    _copyElement = new ShapeElement(clonedElement, name[0] + ' ' + name[1], _selectedElement.ElementIcon);
+                    _copyElement = new ShapeElement(clonedElement, name[0] + ' ' + name[1], SelectedElement.ElementIcon);
                 }
             }
         }
 
         private void Cut_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedElement != null)
+            if (SelectedElement != null)
             {
-                _copyElement = ShapeList.FirstOrDefault(x => x.ElementName.Equals(_selectedElement.ElementName));
+                _copyElement = ShapeList.FirstOrDefault(x => x.ElementName.Equals(SelectedElement.ElementName));
 
                 SetPrevSelected();
-                _selectedElement = new ShapeElement(new UIElement(),"cut",IconKind.None);
+                SelectedElement = new ShapeElement(new UIElement(),"cut",IconKind.None);
                 UpdateMemento();
                 
                 CareTaker.RemoveElement(CurrentPosition,_copyElement.ElementName);
@@ -1534,7 +1688,7 @@ namespace PaintApp
                 ShapeList.Add(newShape);
 
                 SetPrevSelected();
-                _selectedElement = newShape;
+                SelectedElement = newShape;
 
                 UpdateMemento();
 
