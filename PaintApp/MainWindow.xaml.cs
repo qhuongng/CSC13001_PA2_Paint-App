@@ -1164,25 +1164,37 @@ namespace PaintApp
             if (_painter != null)
             {
                 _isDrawing = false;
-                if(_isSelectArea)
+
+                if (_isSelectArea)
                 {
                     double width = (double)(_visual.RenderSize.Width);
                     double height = (double)(_visual.RenderSize.Height);
 
                     _visual.Visibility = Visibility.Hidden;
-                    RenderTargetBitmap rtb = new RenderTargetBitmap((int)DrawingCanvas.ActualWidth, (int)DrawingCanvas.ActualHeight, 96, 96, PixelFormats.Pbgra32);
-                    rtb.Render(DrawingCanvas);
 
-                    // Xác định vùng cần cắt
+                    RenderTargetBitmap rtb = new RenderTargetBitmap((int)CanvasGrid.RenderSize.Width, (int)CanvasGrid.RenderSize.Height, 96, 96, PixelFormats.Default);
+
+                    VisualBrush sourceBrush = new VisualBrush(CanvasGrid);
+                    DrawingVisual drawingVisual = new DrawingVisual();
+                    DrawingContext drawingContext = drawingVisual.RenderOpen();
+
+                    using (drawingContext)
+                    {
+                        drawingContext.DrawRectangle(sourceBrush, null, new Rect(new Point(0, 0),
+                              new Point(CanvasGrid.RenderSize.Width, CanvasGrid.RenderSize.Height)));
+                    }
+
+                    rtb.Render(drawingVisual);
 
                     // Cắt phần cần thiết từ hình ảnh
-                    CroppedBitmap croppedBitmap = new CroppedBitmap(rtb, new Int32Rect((int)_start.X, (int)_start.Y, (int)width, (int)height));
+                    CroppedBitmap croppedBitmap = new CroppedBitmap(rtb, new Int32Rect((int)Canvas.GetLeft(_visual), (int)Canvas.GetTop(_visual), (int)width, (int)height));
 
                     // Gắn hình ảnh vào clipboard
                     Clipboard.SetImage(croppedBitmap);
 
                     DrawingCanvas.Children.Remove(_visual);
-                } else
+                }
+                else
                 {
                     IShape clone = (IShape)_painter.Clone();
                     int index = indexShape[clone.Name];
