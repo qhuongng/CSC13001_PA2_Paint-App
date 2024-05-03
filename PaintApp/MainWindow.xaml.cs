@@ -860,7 +860,10 @@ namespace PaintApp
             _painter.SetStrokeWidth(1);
             _painter.SetStrokeDashArray(new Double[] {5,2});
 
-            DrawingCanvas.Children.Remove(_selectionBounds);
+            if (Adorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
             SelectionPane.UnselectAll();
             SetSelected(false);
 
@@ -1163,34 +1166,21 @@ namespace PaintApp
                 _isDrawing = false;
                 if(_isSelectArea)
                 {
-
                     double width = (double)(_visual.RenderSize.Width);
                     double height = (double)(_visual.RenderSize.Height);
 
-                    RenderTargetBitmap renderBitmap = new RenderTargetBitmap(
-                        (int)Math.Round(width),
-                        (int)Math.Round(height),
-                        96.0,
-                        96.0,
-                        PixelFormats.Default
-                    );
-                    DrawingVisual dv = new DrawingVisual();
-                    
-                    using (DrawingContext dc = dv.RenderOpen())
-                    {
-                        VisualBrush vb = new VisualBrush(DrawingCanvas);
-                        Rect rect = new Rect
-                        {
-                            X = (double)_visual.GetValue(Canvas.LeftProperty) - 120 - 141,
-                            Y = (double)_visual.GetValue(Canvas.TopProperty) - 60,
-                            Width = width,
-                            Height = height,
-                        };
-                        dc.DrawRectangle(vb, null, rect);
-                    }
-                    renderBitmap.Render(dv);
+                    _visual.Visibility = Visibility.Hidden;
+                    RenderTargetBitmap rtb = new RenderTargetBitmap((int)DrawingCanvas.ActualWidth, (int)DrawingCanvas.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                    rtb.Render(DrawingCanvas);
 
-                    Clipboard.SetImage(renderBitmap);
+                    // Xác định vùng cần cắt
+
+                    // Cắt phần cần thiết từ hình ảnh
+                    CroppedBitmap croppedBitmap = new CroppedBitmap(rtb, new Int32Rect((int)_start.X, (int)_start.Y, (int)width, (int)height));
+
+                    // Gắn hình ảnh vào clipboard
+                    Clipboard.SetImage(croppedBitmap);
+
                     DrawingCanvas.Children.Remove(_visual);
                 } else
                 {
