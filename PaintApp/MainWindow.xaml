@@ -73,7 +73,7 @@
                             <ic:PackIconMaterial x:Name="iconText" Kind="FormatTitle" Height="24" Width="24" Foreground="Gray" IsEnabled="False"/>
                         </RadioButton>
 
-                        <RadioButton Grid.Row="0" Grid.Column="1" x:Name="BtnSelect" GroupName="CtrlBtn" Click="SelectAreaBtn_Click"
+                        <RadioButton Grid.Row="0" Grid.Column="1" x:Name="BtnSelect" GroupName="CtrlBtn" Click="SelectAreaBtn_Click" Unchecked="SelectAreaBtn_Unchecked"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
                             <ic:PackIconMaterial x:Name="iconSelect" Kind="Select" Height="24" Width="24" Foreground="White" IsEnabled="False"/>
                         </RadioButton>
@@ -277,12 +277,11 @@
 
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <!--<ColumnDefinition Width="4*"/>-->
-                    <ColumnDefinition Width="141*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Background="#9D9D9D" Grid.ColumnSpan="2">
-                    <Grid Margin="120,60,120,60">
-                        <Canvas x:Name="DrawingCanvas" Background="White" />
+                <Border x:Name="uh" Grid.Column="0" Background="#9D9D9D" Grid.ColumnSpan="2" Padding="120,60,120,60">
+                    <Grid x:Name="CanvasGrid">
+                        <Border Background="White" />
 
                         <Border x:Name="CanvasHelper" MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
                                 MouseMove="Canvas_MouseMove" Background="Transparent" />
@@ -360,29 +359,29 @@
                         </Grid.ColumnDefinitions>
 
                         <Button Grid.Column="0" x:Name="BtnDelLayer"
-                        Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
-                            <ic:PackIconMaterial Kind="DeleteOutline" Height="24" Width="24" Foreground="White"/>
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}" Click="BtnDelLayer_Click" IsEnabled="False">
+                            <ic:PackIconMaterial x:Name="iconDelLayer" Kind="DeleteOutline" Height="24" Width="24" Foreground="Gray"/>
                         </Button>
 
                         <Button Grid.Column="1" x:Name="BtnLayerUp"
-                        Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
-                            <ic:PackIconMaterial Kind="ArrowUp" Height="24" Width="24" Foreground="White"/>
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}" Click="BtnLayerUp_Click" IsEnabled="False">
+                            <ic:PackIconMaterial x:Name="iconLayerUp" Kind="ArrowUp" Height="24" Width="24" Foreground="Gray"/>
                         </Button>
 
                         <Button Grid.Column="2" x:Name="BtnLayerDown"
-                        Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
-                            <ic:PackIconMaterial Kind="ArrowDown" Height="24" Width="24" Foreground="White"/>
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}" Click="BtnLayerDown_Click" IsEnabled="False">
+                            <ic:PackIconMaterial x:Name="iconLayerDown" Kind="ArrowDown" Height="24" Width="24" Foreground="Gray"/>
                         </Button>
 
                         <Button Grid.Column="3" x:Name="BtnNewLayer"
-                        Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}">
+                                Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconButtonStyle}" Click="BtnNewLayer_Click">
                             <ic:PackIconMaterial Kind="LayersOutline" Height="24" Width="24" Foreground="White"/>
                         </Button>
                     </Grid>
                 </Border>
 
                 <Border DockPanel.Dock="Top" Height="240"
-                BorderBrush="#9D9D9D" BorderThickness="0,0,0,1">
+                        BorderBrush="#9D9D9D" BorderThickness="0,0,0,1">
                     <DockPanel LastChildFill="True">
                         <TextBlock DockPanel.Dock="Top" Text="Selection Pane" Margin="20,10,20,10" Foreground="White" FontSize="20"/>
 
@@ -410,7 +409,21 @@
                     <TextBlock DockPanel.Dock="Top" Text="Layers" Margin="20,10,20,10" Foreground="White" FontSize="20"/>
 
                     <ScrollViewer>
-                        <!--TODO: add layers support-->
+                        <ListView x:Name="LayerList" ItemsSource="{Binding Layers}" SelectedItem="{Binding CurrentLayer, Mode=TwoWay}" Margin="10" SelectionChanged="LayerList_SelectionChanged">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Image Grid.Column="0" Stretch="UniformToFill" Source="{Binding Thumbnail, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,15,10"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding LayerName}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
                     </ScrollViewer>
                 </DockPanel>
             </DockPanel>
