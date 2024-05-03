@@ -117,11 +117,13 @@ namespace PaintApp
         {
             return HistoryMemento[index];
         }
+
         public void RemoveElement(int index, string ElementName)
         {
             // Lưu trữ memento
             RemoveMemento.Add(index,ElementName);
         }
+
         public string GetRemoveElement(int index)
         {
             return RemoveMemento[index];
@@ -364,6 +366,31 @@ namespace PaintApp
             {
                 Cut_Click(null, null);
             }
+
+            if (e.Key == Key.Delete && SelectedElement != null)
+            {
+                if (SelectedElement != null)
+                {
+                    ShapeElement delElement = ShapeList.FirstOrDefault(x => x.ElementName.Equals(SelectedElement.ElementName));
+
+                    SetPrevSelected();
+                    SelectedElement = new ShapeElement(new UIElement(), "del", IconKind.None);
+                    UpdateMemento();
+
+                    CareTaker.RemoveElement(CurrentPosition, delElement.ElementName);
+
+                    ShapeList.Remove(delElement);
+
+                    DrawingCanvas.Children.Clear();
+
+                    foreach (var shape in ShapeList)
+                    {
+                        DrawingCanvas.Children.Add(shape.Element);
+                    }
+
+                    SelectionPane.UnselectAll();
+                }
+            }
         }
 
         private void Canvas_KeyUp(object sender, KeyEventArgs e)
@@ -396,7 +423,7 @@ namespace PaintApp
                 string nameShapeBefore = CareTaker.GetMemento(CurrentPosition - 1).GetElementName();
                 string nameShapeCurrent = CareTaker.GetMemento(CurrentPosition).GetElementName();
                 
-                /// TH nếu vị trí hiện tại là một hình bị xóa
+                // TH nếu vị trí hiện tại là một hình bị cắt
                 if (nameShapeCurrent.Equals("cut"))
                 {
                     if (nameShapeBefore.Equals("cut"))
@@ -405,8 +432,31 @@ namespace PaintApp
                     }
 
                     string elementNameBefore = CareTaker.GetRemoveElement(CurrentPosition);
-                    ShapeElement oldShape = new ShapeElement(new UIElement(),"cutElement",IconKind.None);
+                    ShapeElement oldShape = new ShapeElement(new UIElement(), "cutElement", IconKind.None);
                     
+                    oldShape.restoreFromMemento(CareTaker.HistoryMemento.LastOrDefault(x => x.GetElementName().Equals(elementNameBefore)));
+                    ShapeList.Add(oldShape);
+
+                    CurrentPosition--;
+
+                    DrawingCanvas.Children.Clear();
+
+                    foreach (var shape in ShapeList)
+                    {
+                        DrawingCanvas.Children.Add(shape.Element);
+                    }
+                }
+                /// TH nếu vị trí hiện tại là một hình bị cắt
+                else if (nameShapeCurrent.Equals("del"))
+                {
+                    if (nameShapeBefore.Equals("del"))
+                    {
+                        CurrentPosition--;
+                    }
+
+                    string elementNameBefore = CareTaker.GetRemoveElement(CurrentPosition);
+                    ShapeElement oldShape = new ShapeElement(new UIElement(), "delElement", IconKind.None);
+
                     oldShape.restoreFromMemento(CareTaker.HistoryMemento.LastOrDefault(x => x.GetElementName().Equals(elementNameBefore)));
                     ShapeList.Add(oldShape);
 
@@ -464,6 +514,11 @@ namespace PaintApp
                 string shapeNameAfter = CareTaker.GetMemento(CurrentPosition + 1).GetElementName();
                 
                 if (shapeNameAfter.Equals("cut"))
+                {
+                    string elementNameAfter = CareTaker.GetRemoveElement(CurrentPosition + 1);
+                    ShapeList.Remove(ShapeList.FirstOrDefault(x => x.ElementName.Equals(elementNameAfter)));
+                }
+                else if (shapeNameAfter.Equals("del"))
                 {
                     string elementNameAfter = CareTaker.GetRemoveElement(CurrentPosition + 1);
                     ShapeList.Remove(ShapeList.FirstOrDefault(x => x.ElementName.Equals(elementNameAfter)));
