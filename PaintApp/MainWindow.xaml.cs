@@ -403,10 +403,23 @@ namespace PaintApp
             {
                 Cut_Click(null, null);
             }
+            if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                NewFile_Click(null, null);
+            }
             if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 SaveFile_Click(null, null);
             }
+            if (e.Key == Key.S && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            {
+                SaveAsFile_Click(null, null);
+            }
+            if (e.Key == Key.E && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                Export_Click(null, null);
+            }
+
             if (e.Key == Key.O && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 OpenFile_Click(null, null);
@@ -571,7 +584,85 @@ namespace PaintApp
 
         private void SaveAsFile_Click(object sender, RoutedEventArgs e)
         {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Save As Paint";
+            saveFileDialog.Filter = "JSON files (*.json)|*.json";
+            saveFileDialog.FilterIndex = 1;
+            saveFileDialog.RestoreDirectory = true;
 
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string filePath = saveFileDialog.FileName;
+                SaveFilePath = filePath;
+                _isSaved = true;
+                Dictionary<string, ObservableCollection<DataShape>> data = saveLoadProcess.Save(Layers);
+
+                string json = JsonConvert.SerializeObject(data,
+                    new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Objects
+                    });
+                File.WriteAllText(filePath, json);
+            }
+        }
+
+        private void Export_Click(object sender, RoutedEventArgs e)
+        {
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)CanvasGrid.RenderSize.Width, (int)CanvasGrid.RenderSize.Height, 96, 96, PixelFormats.Default);
+
+            VisualBrush sourceBrush = new VisualBrush(CanvasGrid);
+            DrawingVisual drawingVisual = new DrawingVisual();
+            DrawingContext drawingContext = drawingVisual.RenderOpen();
+
+            using (drawingContext)
+            {
+                drawingContext.DrawRectangle(sourceBrush, null, new Rect(new Point(0, 0),
+                      new Point(CanvasGrid.RenderSize.Width, CanvasGrid.RenderSize.Height)));
+            }
+
+            rtb.Render(drawingVisual);
+            SaveFileDialog saveDialog = new SaveFileDialog();
+            saveDialog.Filter = "PNG Files (*.png)|*.png|JPEG Files (*.jpg)|*.jpg|Bitmap Files (*.bmp)|*.bmp|GIF Files (*.gif)|*.gif|TIFF Files (*.tiff)|*.tiff";
+            if (saveDialog.ShowDialog() == true)
+            {
+                string filePath = saveDialog.FileName;
+
+                // Lưu hình ảnh theo định dạng được chọn trong hộp thoại
+                // Đường dẫn và tên tệp tin đã được chọn sẽ được sử dụng
+                // từ SaveFileDialog
+
+                // Tạo một BitmapEncoder tương ứng với định dạng được chọn
+                BitmapEncoder encoder = null;
+                string selectedExtension = System.IO.Path.GetExtension(filePath).ToLowerInvariant();
+
+                if (selectedExtension == ".png")
+                    encoder = new PngBitmapEncoder();
+                else if (selectedExtension == ".jpg" || selectedExtension == ".jpeg")
+                    encoder = new JpegBitmapEncoder();
+                else if (selectedExtension == ".bmp")
+                    encoder = new BmpBitmapEncoder();
+                else if (selectedExtension == ".gif")
+                    encoder = new GifBitmapEncoder();
+                else if (selectedExtension == ".tiff" || selectedExtension == ".tif")
+                    encoder = new TiffBitmapEncoder();
+
+                // Nếu encoder được khởi tạo thành công, thêm khung hình ảnh vào và lưu tệp tin
+                if (encoder != null)
+                {
+                    encoder.Frames.Add(BitmapFrame.Create(rtb));
+                    using (FileStream fs = File.Open(filePath, FileMode.Create))
+                    {
+                        encoder.Save(fs);
+                    }
+                    // Xác nhận hình ảnh đã được lưu
+                    MessageBox.Show($"Hình ảnh đã được lưu dưới dạng {selectedExtension.ToUpperInvariant()}: {filePath}");
+                }
+                else
+                {
+                    // Hiển thị thông báo lỗi nếu không thể tạo encoder cho định dạng tệp tin
+                    MessageBox.Show("Không hỗ trợ định dạng tệp tin đã chọn.");
+                }
+            }
         }
 
         private void UndoBtn_Click(object sender, RoutedEventArgs e)

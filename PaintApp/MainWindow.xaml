@@ -24,7 +24,8 @@
                             <MenuItem Header="_Open..." InputGestureText="Ctrl+O" Click="OpenFile_Click" />
                             <Separator />
                             <MenuItem Header="_Save" InputGestureText="Ctrl+S" Click="SaveFile_Click"/>
-                            <MenuItem Header="_Save as..." InputGestureText="Ctrl+Shift+X" Click="SaveAsFile_Click"/>
+                            <MenuItem Header="_Save as..." InputGestureText="Ctrl+Shift+S" Click="SaveAsFile_Click"/>
+                            <MenuItem Header="_Export..." InputGestureText="Ctrl+E" Click="Export_Click"/>
                             <Separator />
                             <MenuItem Header="_Quit" InputGestureText="Alt+F4" Click="Quit_Click"/>
                         </MenuItem>
