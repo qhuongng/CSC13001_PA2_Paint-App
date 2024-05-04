@@ -1780,6 +1780,7 @@ namespace PaintApp
             else
             {
                 BtnText.IsChecked = false;
+                TextPanel.Visibility = Visibility.Collapsed;
                 BtnText.IsEnabled = false;
                 iconText.Foreground = Brushes.Gray;
             }
