@@ -137,6 +137,8 @@ namespace MyArrow
             Canvas.SetLeft(container, minX);
             Canvas.SetTop(container, minY);
 
+            container.IsHitTestVisible = false;
+
             return container;
         }
     }
