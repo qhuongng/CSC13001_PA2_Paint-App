@@ -48,6 +48,7 @@ namespace PaintApp
             DrawingCanvas = new Canvas();
             DrawingCanvas.Background = Brushes.Transparent;
             DrawingCanvas.IsHitTestVisible = false;
+            DrawingCanvas.ClipToBounds = true;
             DrawingCanvas.Loaded += DrawingCanvas_Loaded;
 
             int index = window.CanvasGrid.Children.IndexOf(window.CanvasHelper);
