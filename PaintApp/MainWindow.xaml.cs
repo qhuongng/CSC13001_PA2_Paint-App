@@ -580,6 +580,14 @@ namespace PaintApp
 
         private void UndoBtn_Click(object sender, RoutedEventArgs e)
         {
+            if (Adorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
+
+            SelectionPane.UnselectAll();
+            SetSelected(false);
+
             // xử lí logic về hiện hoặc tắt button undo redo
             BtnRedo.IsEnabled = true;
             iconRedo.Foreground = Brushes.White;
@@ -687,6 +695,14 @@ namespace PaintApp
 
         private void RedoBtn_Click(object sender, RoutedEventArgs e)
         {
+            if (Adorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
+
+            SelectionPane.UnselectAll();
+            SetSelected(false);
+
             if (CurrentPosition < CareTaker.HistoryMemento.Count - 1)
             {
                 // kiểm tra xem hình sau trong list có chưa, chưa có thì thêm vào
@@ -1948,6 +1964,9 @@ namespace PaintApp
                 if (!isColorChange)
                 {
                     // activate the move tool by default
+                    BtnMove.IsEnabled = true;
+                    iconMove.Foreground = Brushes.White;
+
                     BtnMove.IsChecked = true;
                     MoveBtn_Click(null, null);
                 }
@@ -1969,6 +1988,10 @@ namespace PaintApp
                 TextPanel.Visibility = Visibility.Collapsed;
                 BtnText.IsEnabled = false;
                 iconText.Foreground = Brushes.Gray;
+
+                BtnMove.IsChecked = false;
+                BtnMove.IsEnabled = false;
+                iconMove.Foreground = Brushes.Gray;
             }
         }
 
@@ -2302,8 +2325,11 @@ namespace PaintApp
             {
                 SelectionPane.IsEnabled = true;
 
-                BtnMove.IsEnabled = true;
-                iconMove.Foreground = Brushes.White;
+                if (SelectedElement != null)
+                {
+                    BtnMove.IsEnabled = true;
+                    iconMove.Foreground = Brushes.White;
+                }
 
                 ShapesBtnGrp.Children.Clear();
 
