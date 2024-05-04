@@ -1505,6 +1505,10 @@ namespace PaintApp
                     Clipboard.SetImage(croppedBitmap);
 
                     DrawingCanvas.Children.Remove(_visual);
+
+                    e.Handled = true;
+
+                    MessageBox.Show("Selected area copied to clipboard.");
                 }
                 else
                 {
