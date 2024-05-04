@@ -59,7 +59,7 @@ namespace MyStar
         {
             _strokeDashArray = strokeDashArray;
         }
-
+        
         public object Clone()
         {
             return MemberwiseClone();
@@ -159,6 +159,7 @@ namespace MyStar
             // create a container Grid to hold the star
             Grid container = new Grid();
 
+            container.Background = Brushes.Transparent;
             container.Width = boundingWidth;
             container.Height = boundingHeight;
             container.Children.Add(starPath);
@@ -167,6 +168,8 @@ namespace MyStar
             // Set the position of the containerGrid
             Canvas.SetLeft(container, minX);
             Canvas.SetTop(container, minY);
+
+            container.IsHitTestVisible = false;
 
             return container;
         }

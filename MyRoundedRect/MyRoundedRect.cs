@@ -120,6 +120,7 @@ namespace MyRoundedRect
             // create a container Grid to hold the rectangle
             Grid container = new Grid();
 
+            container.Background = Brushes.Transparent;
             container.Width = maxX - minX;
             container.Height = maxY - minY;
             container.Children.Add(r);
@@ -127,6 +128,8 @@ namespace MyRoundedRect
 
             Canvas.SetLeft(container, minX);
             Canvas.SetTop(container, minY);
+
+            container.IsHitTestVisible = false;
 
             return container;
         }

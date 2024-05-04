@@ -118,6 +118,7 @@ namespace MyEllipse
             // create a container Grid to hold the ellipse
             Grid container = new Grid();
 
+            container.Background = Brushes.Transparent;
             container.Width = maxX - minX;
             container.Height = maxY - minY;
             container.Children.Add(e);
@@ -125,6 +126,8 @@ namespace MyEllipse
 
             Canvas.SetLeft(container, minX);
             Canvas.SetTop(container, minY);
+
+            container.IsHitTestVisible = false;
 
             return container;
         }

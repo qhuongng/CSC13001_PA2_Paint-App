@@ -108,6 +108,29 @@
                 </Setter>
             </Style>
 
+            <Style x:Key="LayerToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                            <Border x:Name="BtnBorder" Background="Transparent" CornerRadius="2">
+                                <ContentPresenter HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+                            </Border>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter TargetName="BtnBorder" Property="Background" Value="DimGray" />
+                                </Trigger>
+
+                                <Trigger Property="IsPressed" Value="true">
+                                    <Setter TargetName="BtnBorder" Property="Background" Value="LightGray" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style TargetType="Thumb">
                 <Setter Property="Template">
                     <Setter.Value>

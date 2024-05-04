@@ -151,6 +151,7 @@ namespace MyTriangle
 
             Grid container = new Grid();
 
+            container.Background = Brushes.Transparent;
             container.Width = boundingWidth;
             container.Height = boundingHeight;
             container.Children.Add(triangle);
@@ -159,6 +160,8 @@ namespace MyTriangle
             // set the position of the containerGrid
             Canvas.SetLeft(container, minX);
             Canvas.SetTop(container, minY);
+
+            container.IsHitTestVisible = false;
 
             return container;
         }

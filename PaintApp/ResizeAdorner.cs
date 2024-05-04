@@ -123,7 +123,7 @@ namespace PaintApp
             if (shape != null)
             {
                 // scale the shape
-                if (mw.SelectedElement.ElementName != "Ellipse" && mw.SelectedElement.ElementName != "Rectangle" && mw.SelectedElement.ElementName != "Rounded Rectangle")
+                if (!mw.SelectedElement.ElementName.Contains("Ellipse") && !mw.SelectedElement.ElementName.Contains("Rectangle") && !mw.SelectedElement.ElementName.Contains("Rounded Rectangle"))
                 {
                     Point start = new Point(Canvas.GetLeft(element), Canvas.GetTop(element));
 
@@ -158,6 +158,7 @@ namespace PaintApp
         private void Thumb_DragCompleted(object sender, DragCompletedEventArgs e)
         {
             MainWindow mw = (MainWindow)Application.Current.MainWindow;
+            mw.CurrentLayer.RenderThumbnail();
             mw.UpdateMemento();
         }
 
