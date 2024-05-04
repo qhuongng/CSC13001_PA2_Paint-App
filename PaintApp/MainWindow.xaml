@@ -64,9 +64,9 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
 
-                        <RadioButton Grid.Row="0" Grid.Column="0" x:Name="BtnMove" GroupName="CtrlBtn" Click="MoveBtn_Click"
+                        <RadioButton Grid.Row="0" Grid.Column="0" x:Name="BtnMove" GroupName="CtrlBtn" Click="MoveBtn_Click" IsEnabled="False"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
-                            <ic:PackIconMaterial x:Name="iconMove" Kind="CursorMove" Height="24" Width="24" Foreground="White"/>
+                            <ic:PackIconMaterial x:Name="iconMove" Kind="CursorMove" Height="24" Width="24" Foreground="Gray"/>
                         </RadioButton>
 
                         <RadioButton Grid.Row="1" Grid.Column="0" x:Name="BtnText" GroupName="CtrlBtn" Click="TextBtn_Click" Unchecked="TextBtn_Unchecked"
