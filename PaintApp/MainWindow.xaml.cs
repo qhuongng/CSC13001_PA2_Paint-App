@@ -1,14 +1,10 @@
 ﻿using Microsoft.Win32;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Shapes;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Net.Http.Json;
 using System.Reflection;
-using System.Text.Json.Serialization;
-using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -18,8 +14,6 @@ using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using Icon = MahApps.Metro.IconPacks.PackIconMaterial;
 using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
@@ -66,12 +60,12 @@ namespace PaintApp
             return shapeElement;
         }
 
-        public ShapeElementMemento createMemento()
+        public ShapeElementMemento CreateMemento()
         {
             return new ShapeElementMemento(Element, ElementName, ElementIcon);
         }
 
-        public void restoreFromMemento(ShapeElementMemento memento)
+        public void RestoreFromMemento(ShapeElementMemento memento)
         {
             MemoryStream stream = new MemoryStream();
 
@@ -145,7 +139,7 @@ namespace PaintApp
 
         public void RemoveElement(int index, string ElementName)
         {
-            // Lưu trữ memento
+            // save memento
             RemoveMemento.Add(index, ElementName);
         }
 
@@ -281,7 +275,6 @@ namespace PaintApp
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-
         public Dictionary<string, int> indexShape = new Dictionary<string, int>
         {
             {"Rectangle", 0},{"Ellipse", 0},{"Line", 0},{"Arrow", 0},
@@ -403,18 +396,22 @@ namespace PaintApp
             {
                 Cut_Click(null, null);
             }
+
             if (e.Key == Key.N && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 NewFile_Click(null, null);
             }
+
             if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 SaveFile_Click(null, null);
             }
+
             if (e.Key == Key.S && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                 SaveAsFile_Click(null, null);
             }
+
             if (e.Key == Key.E && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 Export_Click(null, null);
@@ -424,6 +421,7 @@ namespace PaintApp
             {
                 OpenFile_Click(null, null);
             }
+
             if (e.Key == Key.Delete && SelectedElement != null)
             {
                 if (SelectedElement != null)
@@ -462,21 +460,26 @@ namespace PaintApp
         {
             if(_isSaved == false)
             {
-                MessageBoxResult result = MessageBox.Show("Do you want to save the changes ? ", "Save Changes", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("Do you want to save the changes you made?", "Save Changes", MessageBoxButton.YesNo);
+
                 if (result == MessageBoxResult.Yes)
                 {
                     SaveFile_Click(null, null);
                 }
+
                 foreach (Layer layer in Layers)
                 {
                     layer.DrawingCanvas.Children.Clear();
                     CanvasGrid.Children.Remove(layer.DrawingCanvas);
                 }
+
                 Layers.Clear();
                 Layers = [new Layer(this, 1)];
                 CurrentLayer = Layers[0];
+
                 StrokeWidth = 1;
                 StrokeType = StrokeTypes[0];
+
                 BtnRedo.IsEnabled = false;
                 iconRedo.Foreground = Brushes.Gray;
 
@@ -491,7 +494,8 @@ namespace PaintApp
         {
             if (!_isSaved)
             {
-                MessageBoxResult result = MessageBox.Show("Do you want to save the changes ? ", "Save Changes", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("Do you want to save the changes you made?", "Save Changes", MessageBoxButton.YesNo);
+                
                 if (result == MessageBoxResult.Yes)
                 {
                     SaveFile_Click(null, null);
@@ -520,9 +524,11 @@ namespace PaintApp
                             layer.DrawingCanvas.Children.Clear();
                             CanvasGrid.Children.Remove(layer.DrawingCanvas);
                         }
+
                         Layers.Clear();
                         Layers = saveLoadProcess.Load(rawData, this);
                         CurrentLayer = Layers[0];
+
                         _isSaved = true;
                     }
                     catch (Exception ex)
@@ -540,21 +546,22 @@ namespace PaintApp
             {
                 if (ShapeList.Count == 0)
                 {
-                    MessageBox.Show("Nothing to save");
+                    MessageBox.Show("There are no unsaved changes.");
                 }
                 else
                 {
                     SaveFileDialog saveFileDialog = new SaveFileDialog();
-                    saveFileDialog.Title = "Save Paint";
-                    saveFileDialog.Filter = "JSON files (*.json)|*.json";
+                    saveFileDialog.Title = "Save As";
+                    saveFileDialog.Filter = "JSON file (*.json)|*.json";
                     saveFileDialog.FilterIndex = 1;
                     saveFileDialog.RestoreDirectory = true;
 
                     if (saveFileDialog.ShowDialog() == true)
                     {
                         string filePath = saveFileDialog.FileName;
+
                         SaveFilePath = filePath;
-                        _isSaved = true;
+
                         Dictionary<string, ObservableCollection<DataShape>> data = saveLoadProcess.Save(Layers);
 
                         string json = JsonConvert.SerializeObject(data,
@@ -562,7 +569,10 @@ namespace PaintApp
                             {
                                 TypeNameHandling = TypeNameHandling.Objects
                             });
+
                         File.WriteAllText(filePath, json);
+
+                        _isSaved = true;
                     }
                 }
             }
@@ -577,6 +587,7 @@ namespace PaintApp
                         {
                             TypeNameHandling = TypeNameHandling.Objects
                         });
+
                     File.WriteAllText(SaveFilePath, json);
                 }
             }
@@ -585,16 +596,17 @@ namespace PaintApp
         private void SaveAsFile_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Title = "Save As Paint";
-            saveFileDialog.Filter = "JSON files (*.json)|*.json";
+            saveFileDialog.Title = "Save As";
+            saveFileDialog.Filter = "JSON file (*.json)|*.json";
             saveFileDialog.FilterIndex = 1;
             saveFileDialog.RestoreDirectory = true;
 
             if (saveFileDialog.ShowDialog() == true)
             {
                 string filePath = saveFileDialog.FileName;
+
                 SaveFilePath = filePath;
-                _isSaved = true;
+
                 Dictionary<string, ObservableCollection<DataShape>> data = saveLoadProcess.Save(Layers);
 
                 string json = JsonConvert.SerializeObject(data,
@@ -602,7 +614,10 @@ namespace PaintApp
                     {
                         TypeNameHandling = TypeNameHandling.Objects
                     });
+
                 File.WriteAllText(filePath, json);
+
+                _isSaved = true;
             }
         }
 
@@ -621,15 +636,14 @@ namespace PaintApp
             }
 
             rtb.Render(drawingVisual);
-            SaveFileDialog saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "PNG Files (*.png)|*.png|JPEG Files (*.jpg)|*.jpg|Bitmap Files (*.bmp)|*.bmp|GIF Files (*.gif)|*.gif|TIFF Files (*.tiff)|*.tiff";
-            if (saveDialog.ShowDialog() == true)
-            {
-                string filePath = saveDialog.FileName;
 
-                // Lưu hình ảnh theo định dạng được chọn trong hộp thoại
-                // Đường dẫn và tên tệp tin đã được chọn sẽ được sử dụng
-                // từ SaveFileDialog
+            SaveFileDialog exportDialog = new SaveFileDialog();
+            exportDialog.Title = "Export Image";
+            exportDialog.Filter = "PNG (*.png)|*.png|JPEG (*.jpg)|*.jpg|Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|TIFF (*.tiff)|*.tiff";
+
+            if (exportDialog.ShowDialog() == true)
+            {
+                string filePath = exportDialog.FileName;
 
                 // Tạo một BitmapEncoder tương ứng với định dạng được chọn
                 BitmapEncoder encoder = null;
@@ -650,17 +664,19 @@ namespace PaintApp
                 if (encoder != null)
                 {
                     encoder.Frames.Add(BitmapFrame.Create(rtb));
+
                     using (FileStream fs = File.Open(filePath, FileMode.Create))
                     {
                         encoder.Save(fs);
                     }
+
                     // Xác nhận hình ảnh đã được lưu
-                    MessageBox.Show($"Hình ảnh đã được lưu dưới dạng {selectedExtension.ToUpperInvariant()}: {filePath}");
+                    MessageBox.Show($"Image exported successfully.");
                 }
                 else
                 {
                     // Hiển thị thông báo lỗi nếu không thể tạo encoder cho định dạng tệp tin
-                    MessageBox.Show("Không hỗ trợ định dạng tệp tin đã chọn.");
+                    MessageBox.Show("The specified format is not supported");
                 }
             }
         }
@@ -698,7 +714,7 @@ namespace PaintApp
                     string elementNameBefore = CareTaker.GetRemoveElement(CurrentPosition);
                     ShapeElement oldShape = new ShapeElement(new UIElement(), "cutElement", IconKind.None);
 
-                    oldShape.restoreFromMemento(CareTaker.HistoryMemento.LastOrDefault(x => x.GetElementName().Equals(elementNameBefore)));
+                    oldShape.RestoreFromMemento(CareTaker.HistoryMemento.LastOrDefault(x => x.GetElementName().Equals(elementNameBefore)));
                     ShapeList.Add(oldShape);
 
                     CurrentPosition--;
@@ -721,7 +737,7 @@ namespace PaintApp
                     string elementNameBefore = CareTaker.GetRemoveElement(CurrentPosition);
                     ShapeElement oldShape = new ShapeElement(new UIElement(), "delElement", IconKind.None);
 
-                    oldShape.restoreFromMemento(CareTaker.HistoryMemento.LastOrDefault(x => x.GetElementName().Equals(elementNameBefore)));
+                    oldShape.RestoreFromMemento(CareTaker.HistoryMemento.LastOrDefault(x => x.GetElementName().Equals(elementNameBefore)));
                     ShapeList.Add(oldShape);
 
                     CurrentPosition--;
@@ -754,7 +770,7 @@ namespace PaintApp
                     else
                     {
                         ShapeElement oldShape = ShapeList.FirstOrDefault(x => x.ElementName.Equals(nameShapeCurrent));
-                        oldShape.restoreFromMemento(CareTaker.GetMemento(CurrentPosition - 1));
+                        oldShape.RestoreFromMemento(CareTaker.GetMemento(CurrentPosition - 1));
                     }
 
                     CurrentPosition--;
@@ -766,7 +782,9 @@ namespace PaintApp
                     }
                 }
             }
+
             _isSaved = false;
+
             Dispatcher.BeginInvoke(new Action(CurrentLayer.RenderThumbnail), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
         }
 
@@ -798,14 +816,14 @@ namespace PaintApp
                     if (countExists == 0)
                     {
                         ShapeElement newShape = new ShapeElement(new UIElement(), "MyElement", IconKind.None);
-                        newShape.restoreFromMemento(CareTaker.GetMemento(CurrentPosition + 1));
+                        newShape.RestoreFromMemento(CareTaker.GetMemento(CurrentPosition + 1));
                         ShapeList.Add(newShape);
 
                     }
                     else
                     {
                         ShapeElement newShape = ShapeList.FirstOrDefault(x => x.ElementName.Equals(shapeNameAfter));
-                        newShape.restoreFromMemento(CareTaker.GetMemento(CurrentPosition + 1));
+                        newShape.RestoreFromMemento(CareTaker.GetMemento(CurrentPosition + 1));
                     }
                 }
 
@@ -829,7 +847,9 @@ namespace PaintApp
                     iconRedo.Foreground = Brushes.Gray;
                 }
             }
+
             _isSaved = false;
+
             Dispatcher.BeginInvoke(new Action(CurrentLayer.RenderThumbnail), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
         }
 
@@ -2079,7 +2099,7 @@ namespace PaintApp
                 MessageBox.Show("bruh");
             }
 
-            CareTaker.AddMemento(SelectedElement.createMemento());
+            CareTaker.AddMemento(SelectedElement.CreateMemento());
             CurrentPosition++;
 
             if (BtnRedo.IsEnabled == true)
@@ -2092,7 +2112,9 @@ namespace PaintApp
                 BtnUndo.IsEnabled = true;
                 iconUndo.Foreground = Brushes.White;
             }
+
             _isSaved = false;
+
             Dispatcher.BeginInvoke(new Action(CurrentLayer.RenderThumbnail), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
         }
 

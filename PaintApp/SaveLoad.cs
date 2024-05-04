@@ -1,13 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Shapes;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -60,8 +55,11 @@ namespace PaintApp
         {
             string[] name = nameShape.Split(' ');
             string style = "";
+
             TextBlock textBlock = new TextBlock();
+
             List<IShape> _prototypes = new List<IShape>();
+
             if (name.Length == 2)
             {
                 if (name[0].Equals("Rounded"))
@@ -81,8 +79,10 @@ namespace PaintApp
             {
                 style = name[0] + ' ' + name[1];
             }
+
             NameShape = nameShape;
             ElementIcon = icon;
+
             string folder = AppDomain.CurrentDomain.BaseDirectory;
             var fis = new DirectoryInfo(folder).GetFiles("*.dll");
 
@@ -99,14 +99,17 @@ namespace PaintApp
                     }
                 }
             }
+
             Shape = _prototypes.FirstOrDefault(x => x.Name.Equals(style));
-            if(uIElement is Shape)
+
+            if (uIElement is Shape)
             {
-                FillColor = (System.Windows.Media.SolidColorBrush)(uIElement as Shape).Fill;
-                StrokeColor = (System.Windows.Media.SolidColorBrush)(uIElement as Shape).Stroke;
+                FillColor = (SolidColorBrush)(uIElement as Shape).Fill;
+                StrokeColor = (SolidColorBrush)(uIElement as Shape).Stroke;
                 StrokeThickness = (uIElement as Shape).StrokeThickness;
                 StrokeDashArray = (uIElement as Shape).StrokeDashArray.ToArray();
-            } else if(uIElement is Grid)
+            }
+            else if (uIElement is Grid)
             {
                 foreach (UIElement child in (uIElement as Grid).Children)
                 {
@@ -114,22 +117,23 @@ namespace PaintApp
                     {
                         System.Windows.Shapes.Path path = child as System.Windows.Shapes.Path;
 
-                        FillColor = (System.Windows.Media.SolidColorBrush)path.Fill;
-                        StrokeColor = (System.Windows.Media.SolidColorBrush)path.Stroke;
+                        FillColor = (SolidColorBrush)path.Fill;
+                        StrokeColor = (SolidColorBrush)path.Stroke;
                         StrokeThickness = path.StrokeThickness;
                         StrokeDashArray = path.StrokeDashArray.ToArray();
                     }
                     else if (child is Shape)
                     {
-                        FillColor = (System.Windows.Media.SolidColorBrush)(child as Shape).Fill;
-                        StrokeColor = (System.Windows.Media.SolidColorBrush)(child as Shape).Stroke;
+                        FillColor = (SolidColorBrush)(child as Shape).Fill;
+                        StrokeColor = (SolidColorBrush)(child as Shape).Stroke;
                         StrokeThickness = (child as Shape).StrokeThickness;
                         StrokeDashArray = (child as Shape).StrokeDashArray.ToArray();
                     }
                 }
             }
-            StartPoint = new Point((Double)uIElement.GetValue(Canvas.LeftProperty), (Double)uIElement.GetValue(Canvas.TopProperty));
-            EndPoint = new Point((Double)uIElement.GetValue(Canvas.LeftProperty) + (Double)uIElement.GetValue(Canvas.ActualWidthProperty), (Double)uIElement.GetValue(Canvas.TopProperty) + (Double)uIElement.GetValue(Canvas.ActualHeightProperty));
+
+            StartPoint = new Point((double)uIElement.GetValue(Canvas.LeftProperty), (double)uIElement.GetValue(Canvas.TopProperty));
+            EndPoint = new Point((double)uIElement.GetValue(Canvas.LeftProperty) + (double)uIElement.GetValue(Canvas.ActualWidthProperty), (double)uIElement.GetValue(Canvas.TopProperty) + (double)uIElement.GetValue(Canvas.ActualHeightProperty));
             
             foreach (UIElement child in ((Grid)uIElement).Children)
             {
@@ -138,6 +142,7 @@ namespace PaintApp
                     textBlock = child as TextBlock;
                 }
             }
+
             if (textBlock != null)
             {
                 FontFamilyTB = textBlock.FontFamily;
@@ -157,6 +162,7 @@ namespace PaintApp
             Shape.SetStrokeWidth(StrokeThickness);
             Shape.AddStart(StartPoint);
             Shape.AddEnd(EndPoint);
+
             ShapeElement element = new ShapeElement(Shape.Convert(),NameShape,ElementIcon);
             TextBlock target = null;
 
@@ -167,7 +173,8 @@ namespace PaintApp
                     target = child as TextBlock;
                 }
             }
-            if(target != null)
+
+            if (target != null)
             {
                 target.Text = TextTB;
                 target.TextAlignment = TextAlignmentTB;
@@ -177,10 +184,11 @@ namespace PaintApp
                 target.FontWeight = FontWeightTB;
                 target.TextDecorations = TextDecorationTB;
             }
+
             return element;
         }
-
     }
+
     public class SaveLoad
     {
         public Dictionary<string, ObservableCollection<DataShape>> Save(ObservableCollection<Layer> layers)
@@ -190,14 +198,18 @@ namespace PaintApp
             foreach (Layer layer in layers)
             {
                 ObservableCollection<DataShape> datas = new ObservableCollection<DataShape>(); 
+
                 foreach (ShapeElement element in layer.ShapeList)
                 {
                     datas.Add(new DataShape(element.Element, element.ElementName, element.ElementIcon));
                 }
+
                 dataLayer.Add(layer.LayerName, datas);
             }
+
             return dataLayer;
         }
+
         public ObservableCollection<Layer> Load(Dictionary<string, ObservableCollection<DataShape>> data, MainWindow window)
         {
             ObservableCollection<Layer> layers = new ObservableCollection<Layer>();
@@ -205,17 +217,22 @@ namespace PaintApp
             foreach(var item in  data)
             {
                 int index = int.Parse(item.Key.Split(' ')[1]);
+
                 Layer layer = new Layer(window, index);
                 ObservableCollection<ShapeElement> shapeElements = new ObservableCollection<ShapeElement>();
+
                 foreach (var element in item.Value)
                 {
                     ShapeElement uIElement = element.Convert();
                     shapeElements.Add(uIElement);
+
                     layer.DrawingCanvas.Children.Add(uIElement.Element);
                 }
+
                 layer.SetShapeList(shapeElements);
                 layers.Add(layer);
             }
+
             return layers;
         }
     }
