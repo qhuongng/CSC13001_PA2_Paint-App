@@ -409,7 +409,7 @@
                     <TextBlock DockPanel.Dock="Top" Text="Layers" Margin="20,10,20,10" Foreground="White" FontSize="20"/>
 
                     <ScrollViewer>
-                        <ListView x:Name="LayerList" ItemsSource="{Binding Layers}" SelectedItem="{Binding CurrentLayer, Mode=TwoWay}" Margin="10" SelectionChanged="LayerList_SelectionChanged">
+                        <ListView x:Name="LayerList" ItemsSource="{Binding Layers, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding CurrentLayer, Mode=TwoWay}" Margin="10" SelectionChanged="LayerList_SelectionChanged">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <Grid>

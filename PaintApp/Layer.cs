@@ -54,6 +54,10 @@ namespace PaintApp
 
             window.CanvasGrid.Children.Insert(index, DrawingCanvas);
         }
+        public void SetShapeList(ObservableCollection<ShapeElement> shapes)
+        {
+            ShapeList = shapes;
+        }
 
         private void DrawingCanvas_Loaded(object sender, RoutedEventArgs e)
         {

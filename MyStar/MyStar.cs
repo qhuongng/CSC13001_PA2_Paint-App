@@ -59,7 +59,7 @@ namespace MyStar
         {
             _strokeDashArray = strokeDashArray;
         }
-
+        
         public object Clone()
         {
             return MemberwiseClone();
