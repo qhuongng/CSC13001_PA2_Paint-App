@@ -56,7 +56,7 @@ namespace PaintApp
             UIElement clonedElement = (UIElement)XamlReader.Load(stream);
             Canvas.SetTop(clonedElement, Canvas.GetTop(memento.GetElement()));
             Canvas.SetLeft(clonedElement, Canvas.GetLeft(memento.GetElement()));
-          
+
             Element = clonedElement;
             ElementName = memento.GetElementName();
             ElementIcon = memento.GetIcon();
@@ -78,10 +78,10 @@ namespace PaintApp
             stream.Seek(0, SeekOrigin.Begin);
 
             UIElement clonedElement = (UIElement)XamlReader.Load(stream);
-          
-            Canvas.SetTop(clonedElement,Canvas.GetTop(ele));
-            Canvas.SetLeft(clonedElement,Canvas.GetLeft(ele));
-          
+
+            Canvas.SetTop(clonedElement, Canvas.GetTop(ele));
+            Canvas.SetLeft(clonedElement, Canvas.GetLeft(ele));
+
             _element = clonedElement;
             _elementName = name;
             _elementIcon = icon;
@@ -107,9 +107,9 @@ namespace PaintApp
     {
         public List<ShapeElementMemento> HistoryMemento = new List<ShapeElementMemento>();
         public Dictionary<int, string> RemoveMemento = new Dictionary<int, string>();
-      
-        public void AddMemento(ShapeElementMemento memento) 
-        { 
+
+        public void AddMemento(ShapeElementMemento memento)
+        {
             HistoryMemento.Add(memento);
         }
 
@@ -121,7 +121,7 @@ namespace PaintApp
         public void RemoveElement(int index, string ElementName)
         {
             // Lưu trữ memento
-            RemoveMemento.Add(index,ElementName);
+            RemoveMemento.Add(index, ElementName);
         }
 
         public string GetRemoveElement(int index)
@@ -160,7 +160,7 @@ namespace PaintApp
 
         public ObservableCollection<double> FontSizes { get; set; }
 
-        public ObservableCollection<Layer> Layers{ get; set; }
+        public ObservableCollection<Layer> Layers { get; set; }
 
         private Layer _currentLayer;
         public Layer CurrentLayer
@@ -320,7 +320,7 @@ namespace PaintApp
                         Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.White), Width = 24, Height = 24 },
                         Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
                         GroupName = "CtrlBtn",
-                        Tag = item,
+                        Tag = item
                     };
 
                     control.Click += ShapeBtn_Click;
@@ -422,7 +422,7 @@ namespace PaintApp
             {
                 string nameShapeBefore = CareTaker.GetMemento(CurrentPosition - 1).GetElementName();
                 string nameShapeCurrent = CareTaker.GetMemento(CurrentPosition).GetElementName();
-                
+
                 // TH nếu vị trí hiện tại là một hình bị cắt
                 if (nameShapeCurrent.Equals("cut"))
                 {
@@ -433,7 +433,7 @@ namespace PaintApp
 
                     string elementNameBefore = CareTaker.GetRemoveElement(CurrentPosition);
                     ShapeElement oldShape = new ShapeElement(new UIElement(), "cutElement", IconKind.None);
-                    
+
                     oldShape.restoreFromMemento(CareTaker.HistoryMemento.LastOrDefault(x => x.GetElementName().Equals(elementNameBefore)));
                     ShapeList.Add(oldShape);
 
@@ -512,7 +512,7 @@ namespace PaintApp
             {
                 // kiểm tra xem hình sau trong list có chưa, chưa có thì thêm vào
                 string shapeNameAfter = CareTaker.GetMemento(CurrentPosition + 1).GetElementName();
-                
+
                 if (shapeNameAfter.Equals("cut"))
                 {
                     string elementNameAfter = CareTaker.GetRemoveElement(CurrentPosition + 1);
@@ -568,7 +568,7 @@ namespace PaintApp
 
             Dispatcher.BeginInvoke(new Action(CurrentLayer.RenderThumbnail), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
         }
-        
+
         private void RotateRightBtn_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedElement != null)
@@ -731,7 +731,7 @@ namespace PaintApp
                 flip.CenterX = centerX;
                 flip.CenterY = centerY;
 
-                rotate.CenterX  = centerX;
+                rotate.CenterX = centerX;
                 rotate.CenterY = centerY;
 
                 TransformGroup transformGroup = new TransformGroup();
@@ -970,7 +970,7 @@ namespace PaintApp
             {
                 AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
             }
-            
+
             SelectionPane.UnselectAll();
             SetSelected(false);
 
@@ -984,7 +984,7 @@ namespace PaintApp
             _painter.SetStrokeColor(new SolidColorBrush(Colors.Red));
             _painter.SetFillColor(new SolidColorBrush(Colors.Transparent));
             _painter.SetStrokeWidth(1);
-            _painter.SetStrokeDashArray(new Double[] {5,2});
+            _painter.SetStrokeDashArray(new Double[] { 5, 2 });
 
             if (Adorner != null)
             {
@@ -1264,7 +1264,7 @@ namespace PaintApp
                 {
                     AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
                 }
-                
+
                 SelectionPane.UnselectAll();
                 SetSelected(false);
             }
@@ -1647,7 +1647,8 @@ namespace PaintApp
                 BtnDelLayer.IsEnabled = true;
                 iconDelLayer.Foreground = Brushes.White;
 
-                if (index == 0) {
+                if (index == 0)
+                {
                     BtnLayerUp.IsEnabled = false;
                     iconLayerUp.Foreground = Brushes.Gray;
 
@@ -1670,6 +1671,8 @@ namespace PaintApp
                     BtnLayerUp.IsEnabled = true;
                     iconLayerUp.Foreground = Brushes.White;
                 }
+
+                SetControlsToLayerVisibility(CurrentLayer.DrawingCanvas.Visibility == Visibility.Visible);
             }
             else
             {
@@ -1681,6 +1684,8 @@ namespace PaintApp
 
                 BtnLayerUp.IsEnabled = false;
                 iconLayerUp.Foreground = Brushes.Gray;
+
+                SetControlsToLayerVisibility(false);
             }
         }
 
@@ -1827,7 +1832,7 @@ namespace PaintApp
 
         private void Quit_Click(object sender, RoutedEventArgs e)
         {
-            
+
         }
 
         private void Copy_Click(object sender, RoutedEventArgs e)
@@ -1847,11 +1852,12 @@ namespace PaintApp
                     if (name[0].Equals("Rounded"))
                     {
                         _copyElement = new ShapeElement(clonedElement, name[0] + ' ' + name[1], SelectedElement.ElementIcon);
-                    } else
+                    }
+                    else
                     {
                         _copyElement = new ShapeElement(clonedElement, name[0], SelectedElement.ElementIcon);
                     }
-                } 
+                }
                 else if (name.Length == 1)
                 {
                     _copyElement = new ShapeElement(clonedElement, name[0], SelectedElement.ElementIcon);
@@ -1903,7 +1909,7 @@ namespace PaintApp
                 Canvas.SetTop(clonedElement, index);
                 Canvas.SetLeft(clonedElement, index);
 
-                ShapeElement newShape = new ShapeElement(clonedElement,_copyElement.ElementName +  " " + index, _copyElement.ElementIcon);
+                ShapeElement newShape = new ShapeElement(clonedElement, _copyElement.ElementName + " " + index, _copyElement.ElementIcon);
 
                 indexShape[_copyElement.ElementName] += 1;
 
@@ -1990,6 +1996,137 @@ namespace PaintApp
 
                 BtnLayerUp.IsEnabled = true;
                 iconLayerUp.Foreground = Brushes.Gray;
+            }
+        }
+
+        private void BtnHideLayer_Click(object sender, RoutedEventArgs e)
+        {
+            if (Adorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
+
+            ToggleButton tb = sender as ToggleButton;
+            Layer l = tb.DataContext as Layer;
+
+            if (tb.IsChecked == true)
+            {
+                l.DrawingCanvas.Visibility = Visibility.Collapsed;
+
+                if (l == CurrentLayer)
+                {
+                    SetControlsToLayerVisibility(false);
+                }
+            }
+            else
+            {
+                l.DrawingCanvas.Visibility = Visibility.Visible;
+
+                if (l == CurrentLayer)
+                {
+                    SetControlsToLayerVisibility(true);
+                }
+            }
+        }
+
+        public void SetControlsToLayerVisibility(bool isLayerVisible)
+        {
+            SelectionPane.UnselectAll();
+            SetSelected(false);
+            BtnMove.IsChecked = false;
+            
+            if (!isLayerVisible)
+            {
+                SelectionPane.IsEnabled = false;
+
+                BtnMove.IsEnabled = false;
+                iconMove.Foreground = Brushes.Gray;
+
+                BtnText.IsEnabled = false;
+                iconText.Foreground = Brushes.Gray;
+
+                ShapesBtnGrp.Children.Clear();
+
+                int k = 0;
+
+                for (int i = 0; i < ShapesBtnGrp.RowDefinitions.Count; i++)
+                {
+                    for (int j = 0; j < ShapesBtnGrp.ColumnDefinitions.Count; j++)
+                    {
+                        if (k == _prototypes.Count)
+                        {
+                            break;
+                        }
+
+                        var item = _prototypes[k];
+
+                        var control = new RadioButton()
+                        {
+                            Width = 36,
+                            Height = 36,
+                            Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.Gray), Width = 24, Height = 24 },
+                            Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
+                            GroupName = "CtrlBtn",
+                            Tag = item
+                        };
+
+                        control.Click += ShapeBtn_Click;
+
+                        Grid.SetRow(control, i);
+                        Grid.SetColumn(control, j);
+
+                        ShapesBtnGrp.Children.Add(control);
+
+                        k++;
+                    }
+                }
+
+                ShapesBtnGrp.IsEnabled = false;
+            }
+            else
+            {
+                SelectionPane.IsEnabled = true;
+
+                BtnMove.IsEnabled = true;
+                iconMove.Foreground = Brushes.White;
+
+                ShapesBtnGrp.Children.Clear();
+
+                int k = 0;
+
+                for (int i = 0; i < ShapesBtnGrp.RowDefinitions.Count; i++)
+                {
+                    for (int j = 0; j < ShapesBtnGrp.ColumnDefinitions.Count; j++)
+                    {
+                        if (k == _prototypes.Count)
+                        {
+                            break;
+                        }
+
+                        var item = _prototypes[k];
+
+                        var control = new RadioButton()
+                        {
+                            Width = 36,
+                            Height = 36,
+                            Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.White), Width = 24, Height = 24 },
+                            Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
+                            GroupName = "CtrlBtn",
+                            Tag = item
+                        };
+
+                        control.Click += ShapeBtn_Click;
+
+                        Grid.SetRow(control, i);
+                        Grid.SetColumn(control, j);
+
+                        ShapesBtnGrp.Children.Add(control);
+
+                        k++;
+                    }
+                }
+
+                ShapesBtnGrp.IsEnabled = true;
             }
         }
     }
