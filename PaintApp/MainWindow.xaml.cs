@@ -19,146 +19,17 @@ using IconKind = MahApps.Metro.IconPacks.PackIconMaterialKind;
 
 namespace PaintApp
 {
-    public class ShapeElement
-    {
-        public UIElement Element { get; set; }
-        public string ElementName { get; set; }
-        public IconKind ElementIcon { get; set; }
-
-        public ShapeElement(UIElement element, string name, IconKind icon)
-        {
-            MemoryStream stream = new MemoryStream();
-
-            XamlWriter.Save(element, stream);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
-            clonedElement.RenderSize = element.RenderSize;
-
-            Canvas.SetTop(clonedElement, Canvas.GetTop(element));
-            Canvas.SetLeft(clonedElement, Canvas.GetLeft(element));
-
-            Element = element;
-            ElementName = name;
-            ElementIcon = icon;
-        }
-
-        public ShapeElement Clone()
-        {
-            MemoryStream stream = new MemoryStream();
-
-            XamlWriter.Save(Element, stream);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
-            clonedElement.RenderSize = Element.RenderSize;
-
-            Canvas.SetTop(clonedElement, Canvas.GetTop(Element));
-            Canvas.SetLeft(clonedElement, Canvas.GetLeft(Element));
-
-            ShapeElement shapeElement = new ShapeElement(clonedElement, ElementName, ElementIcon);
-            return shapeElement;
-        }
-
-        public ShapeElementMemento CreateMemento()
-        {
-            return new ShapeElementMemento(Element, ElementName, ElementIcon);
-        }
-
-        public void RestoreFromMemento(ShapeElementMemento memento)
-        {
-            MemoryStream stream = new MemoryStream();
-
-            XamlWriter.Save(memento.GetElement(), stream);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
-            Canvas.SetTop(clonedElement, Canvas.GetTop(memento.GetElement()));
-            Canvas.SetLeft(clonedElement, Canvas.GetLeft(memento.GetElement()));
-
-            Element = clonedElement;
-            ElementName = memento.GetElementName();
-            ElementIcon = memento.GetIcon();
-        }
-    }
-
-    public class ShapeElementMemento
-    {
-        private readonly UIElement _element;
-        private readonly string _elementName;
-        private readonly IconKind _elementIcon;
-
-        public ShapeElementMemento(UIElement ele, string name, IconKind icon)
-        {
-            // Tạo bản sao của UIElement
-            MemoryStream stream = new MemoryStream();
-
-            XamlWriter.Save(ele, stream);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            UIElement clonedElement = (UIElement)XamlReader.Load(stream);
-
-            Canvas.SetTop(clonedElement, Canvas.GetTop(ele));
-            Canvas.SetLeft(clonedElement, Canvas.GetLeft(ele));
-
-            _element = clonedElement;
-            _elementName = name;
-            _elementIcon = icon;
-        }
-
-        public UIElement GetElement()
-        {
-            return _element;
-        }
-
-        public string GetElementName()
-        {
-            return _elementName;
-        }
-
-        public IconKind GetIcon()
-        {
-            return _elementIcon;
-        }
-    }
-
-    public class CareTakerShape
-    {
-        public List<ShapeElementMemento> HistoryMemento = new List<ShapeElementMemento>();
-        public Dictionary<int, string> RemoveMemento = new Dictionary<int, string>();
-
-        public void AddMemento(ShapeElementMemento memento)
-        {
-            HistoryMemento.Add(memento);
-        }
-
-        public ShapeElementMemento GetMemento(int index)
-        {
-            return HistoryMemento[index];
-        }
-
-        public void RemoveElement(int index, string ElementName)
-        {
-            // save memento
-            RemoveMemento.Add(index, ElementName);
-        }
-
-        public string GetRemoveElement(int index)
-        {
-            return RemoveMemento[index];
-        }
-    }
-
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        SaveLoad saveLoadProcess = new SaveLoad();
+
+        SaveLoad _saveLoadProcess = new SaveLoad();
 
         bool _isDrawing = false;
         bool _isDragging = false;
         bool _justEditedText = false;
         bool _isSelectArea = false;
-        bool _isSaved = false;
+        bool _isSaved = true;
 
         Point _start;
         Point _end;
@@ -446,6 +317,12 @@ namespace PaintApp
                     SelectionPane.UnselectAll();
                 }
             }
+
+            if (e.Key == Key.System && e.SystemKey == Key.F4)
+            {
+                e.Handled = true;
+                Quit_Click(null, null);
+            }
         }
 
         private void Canvas_KeyUp(object sender, KeyEventArgs e)
@@ -458,36 +335,56 @@ namespace PaintApp
 
         private void NewFile_Click(object sender, RoutedEventArgs e)
         {
-            if(_isSaved == false)
+            if (_isSaved == false)
             {
-                MessageBoxResult result = MessageBox.Show("Do you want to save the changes you made?", "Save Changes", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("Do you want to save the changes you made?", "Save Changes", MessageBoxButton.YesNoCancel);
 
                 if (result == MessageBoxResult.Yes)
                 {
                     SaveFile_Click(null, null);
-                }
 
-                foreach (Layer layer in Layers)
+                    if (_isSaved == true)
+                    {
+                        ResetWorkspace();
+                    }
+                }
+                else if (result == MessageBoxResult.Cancel)
                 {
-                    layer.DrawingCanvas.Children.Clear();
-                    CanvasGrid.Children.Remove(layer.DrawingCanvas);
+                    return;
                 }
-
-                Layers.Clear();
-                Layers = [new Layer(this, 1)];
-                CurrentLayer = Layers[0];
-
-                StrokeWidth = 1;
-                StrokeType = StrokeTypes[0];
-
-                BtnRedo.IsEnabled = false;
-                iconRedo.Foreground = Brushes.Gray;
-
-                BtnUndo.IsEnabled = false;
-                iconUndo.Foreground = Brushes.Gray;
-
-                FontCb.ItemsSource = Fonts.SystemFontFamilies;
+                else
+                {
+                    ResetWorkspace();
+                }
             }
+            else
+            {
+                ResetWorkspace();
+            }
+        }
+
+        private void ResetWorkspace()
+        {
+            foreach (Layer layer in Layers)
+            {
+                layer.DrawingCanvas.Children.Clear();
+                CanvasGrid.Children.Remove(layer.DrawingCanvas);
+            }
+
+            Layers.Clear();
+            Layers = [new Layer(this, 1)];
+            CurrentLayer = Layers[0];
+
+            StrokeWidth = 1;
+            StrokeType = StrokeTypes[0];
+
+            BtnRedo.IsEnabled = false;
+            iconRedo.Foreground = Brushes.Gray;
+
+            BtnUndo.IsEnabled = false;
+            iconUndo.Foreground = Brushes.Gray;
+
+            FontCb.ItemsSource = Fonts.SystemFontFamilies;
         }
 
         private void OpenFile_Click(object sender, RoutedEventArgs e)
@@ -526,7 +423,7 @@ namespace PaintApp
                         }
 
                         Layers.Clear();
-                        Layers = saveLoadProcess.Load(rawData, this);
+                        Layers = _saveLoadProcess.Load(rawData, this);
                         CurrentLayer = Layers[0];
 
                         _isSaved = true;
@@ -562,7 +459,7 @@ namespace PaintApp
 
                         SaveFilePath = filePath;
 
-                        Dictionary<string, ObservableCollection<DataShape>> data = saveLoadProcess.Save(Layers);
+                        Dictionary<string, ObservableCollection<DataShape>> data = _saveLoadProcess.Save(Layers);
 
                         string json = JsonConvert.SerializeObject(data,
                             new JsonSerializerSettings
@@ -580,7 +477,7 @@ namespace PaintApp
             {
                 if (_isSaved == false)
                 {
-                    Dictionary<string, ObservableCollection<DataShape>> data = saveLoadProcess.Save(Layers);
+                    Dictionary<string, ObservableCollection<DataShape>> data = _saveLoadProcess.Save(Layers);
 
                     string json = JsonConvert.SerializeObject(data,
                         new JsonSerializerSettings
@@ -607,7 +504,7 @@ namespace PaintApp
 
                 SaveFilePath = filePath;
 
-                Dictionary<string, ObservableCollection<DataShape>> data = saveLoadProcess.Save(Layers);
+                Dictionary<string, ObservableCollection<DataShape>> data = _saveLoadProcess.Save(Layers);
 
                 string json = JsonConvert.SerializeObject(data,
                     new JsonSerializerSettings
@@ -1878,6 +1775,7 @@ namespace PaintApp
             }
         }
 
+
         private void Element_MouseUp(object sender, MouseButtonEventArgs e)
         {
             _isDragging = false;
@@ -2120,7 +2018,32 @@ namespace PaintApp
 
         private void Quit_Click(object sender, RoutedEventArgs e)
         {
+            if (_isSaved == false)
+            {
+                MessageBoxResult result = MessageBox.Show("Do you want to save the changes you made?", "Save Changes", MessageBoxButton.YesNoCancel);
 
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveFile_Click(null, null);
+
+                    if (_isSaved == true)
+                    {
+                        Application.Current.Shutdown();
+                    }
+                }
+                else if (result == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+                else
+                {
+                    Application.Current.Shutdown();
+                }
+            }
+            else
+            {
+                Application.Current.Shutdown();
+            }
         }
 
         private void Copy_Click(object sender, RoutedEventArgs e)
