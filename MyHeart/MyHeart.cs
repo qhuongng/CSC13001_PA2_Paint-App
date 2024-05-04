@@ -149,12 +149,13 @@ namespace MyHeart
             // create a container Grid to hold the star
             Grid container = new Grid();
 
+            container.Background = Brushes.Transparent;
             container.Width = boundingWidth;
             container.Height = boundingHeight;
             container.Children.Add(heartPath);
             container.Children.Add(tb);
 
-            // Set the position of the containerGrid
+            // set the position of the containerGrid
             Canvas.SetLeft(container, minX);
             Canvas.SetTop(container, minY);
 

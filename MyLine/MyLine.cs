@@ -90,6 +90,7 @@ namespace MyLine
 
             Grid container = new Grid();
 
+            container.Background = Brushes.Transparent;
             container.Width = Math.Abs(_end.X - _start.X);
             container.Height = Math.Abs(_end.Y - _start.Y);
             container.Children.Add(l);

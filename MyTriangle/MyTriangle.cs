@@ -151,6 +151,7 @@ namespace MyTriangle
 
             Grid container = new Grid();
 
+            container.Background = Brushes.Transparent;
             container.Width = boundingWidth;
             container.Height = boundingHeight;
             container.Children.Add(triangle);

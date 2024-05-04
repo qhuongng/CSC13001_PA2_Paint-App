@@ -129,6 +129,7 @@ namespace MyArrow
             // create a container Grid to hold the arrow
             Grid container = new Grid();
 
+            container.Background = Brushes.Transparent;
             container.Width = maxX - minX;
             container.Height = maxY - minY;
             container.Children.Add(arrowPath);
