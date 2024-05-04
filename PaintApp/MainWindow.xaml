@@ -65,7 +65,7 @@
 
                         <RadioButton Grid.Row="0" Grid.Column="0" x:Name="BtnMove" GroupName="CtrlBtn" Click="MoveBtn_Click"
                                 Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource IconRadioButtonStyle}">
-                            <ic:PackIconMaterial Kind="CursorMove" Height="24" Width="24" Foreground="White"/>
+                            <ic:PackIconMaterial x:Name="iconMove" Kind="CursorMove" Height="24" Width="24" Foreground="White"/>
                         </RadioButton>
 
                         <RadioButton Grid.Row="1" Grid.Column="0" x:Name="BtnText" GroupName="CtrlBtn" Click="TextBtn_Click" Unchecked="TextBtn_Unchecked"
@@ -409,18 +409,33 @@
                     <TextBlock DockPanel.Dock="Top" Text="Layers" Margin="20,10,20,10" Foreground="White" FontSize="20"/>
 
                     <ScrollViewer>
-                        <ListView x:Name="LayerList" ItemsSource="{Binding Layers, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding CurrentLayer, Mode=TwoWay}" Margin="10" SelectionChanged="LayerList_SelectionChanged">
+                        <ListView x:Name="LayerList" d:ItemsSource="{d:SampleData}" ItemsSource="{Binding Layers}"
+                                  SelectedItem="{Binding CurrentLayer, Mode=TwoWay}" Margin="10"
+                                  SelectionChanged="LayerList_SelectionChanged" HorizontalContentAlignment="Stretch">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
+                                    <DockPanel LastChildFill="True" HorizontalAlignment="Stretch">
+                                        <Image DockPanel.Dock="Left" Width="100" Height="56.25" Stretch="Fill"
+                                               Source="{Binding Thumbnail, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,10"/>
 
-                                        <Image Grid.Column="0" Stretch="UniformToFill" Source="{Binding Thumbnail, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,15,10"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding LayerName}" VerticalAlignment="Center" />
-                                    </Grid>
+                                        <ToggleButton DockPanel.Dock="Right" x:Name="BtnHideLayer" Click="BtnHideLayer_Click"
+                                              Height="36" Width="36" VerticalAlignment="Center" Style="{StaticResource LayerToggleButtonStyle}">
+                                            <ic:PackIconMaterial x:Name="iconVisibility" Kind="EyeOutline" Height="24" Width="24" Foreground="White"/>
+                                        </ToggleButton>
+
+                                        <TextBlock Text="{Binding LayerName}" VerticalAlignment="Center"
+                                                   Margin="10,0,10,0" TextTrimming="CharacterEllipsis" />
+                                    </DockPanel>
+
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=BtnHideLayer}" Value="True">
+                                            <Setter TargetName="iconVisibility" Property="Kind" Value="EyeOffOutline"/>
+                                        </DataTrigger>
+                                        
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=BtnHideLayer}" Value="False">
+                                            <Setter TargetName="iconVisibility" Property="Kind" Value="EyeOutline"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>

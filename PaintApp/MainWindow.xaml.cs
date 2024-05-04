@@ -357,7 +357,7 @@ namespace PaintApp
                         Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.White), Width = 24, Height = 24 },
                         Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
                         GroupName = "CtrlBtn",
-                        Tag = item,
+                        Tag = item
                     };
 
                     control.Click += ShapeBtn_Click;
@@ -1844,6 +1844,8 @@ namespace PaintApp
                     BtnLayerUp.IsEnabled = true;
                     iconLayerUp.Foreground = Brushes.White;
                 }
+
+                SetControlsToLayerVisibility(CurrentLayer.DrawingCanvas.Visibility == Visibility.Visible);
             }
             else
             {
@@ -1855,6 +1857,8 @@ namespace PaintApp
 
                 BtnLayerUp.IsEnabled = false;
                 iconLayerUp.Foreground = Brushes.Gray;
+
+                SetControlsToLayerVisibility(false);
             }
         }
 
@@ -1948,6 +1952,8 @@ namespace PaintApp
             }
             else
             {
+                BtnText.IsChecked = false;
+                TextPanel.Visibility = Visibility.Collapsed;
                 BtnText.IsEnabled = false;
                 iconText.Foreground = Brushes.Gray;
             }
@@ -2165,6 +2171,137 @@ namespace PaintApp
 
                 BtnLayerUp.IsEnabled = true;
                 iconLayerUp.Foreground = Brushes.Gray;
+            }
+        }
+
+        private void BtnHideLayer_Click(object sender, RoutedEventArgs e)
+        {
+            if (Adorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(DrawingCanvas).Remove(Adorner);
+            }
+
+            ToggleButton tb = sender as ToggleButton;
+            Layer l = tb.DataContext as Layer;
+
+            if (tb.IsChecked == true)
+            {
+                l.DrawingCanvas.Visibility = Visibility.Collapsed;
+
+                if (l == CurrentLayer)
+                {
+                    SetControlsToLayerVisibility(false);
+                }
+            }
+            else
+            {
+                l.DrawingCanvas.Visibility = Visibility.Visible;
+
+                if (l == CurrentLayer)
+                {
+                    SetControlsToLayerVisibility(true);
+                }
+            }
+        }
+
+        public void SetControlsToLayerVisibility(bool isLayerVisible)
+        {
+            SelectionPane.UnselectAll();
+            SetSelected(false);
+            BtnMove.IsChecked = false;
+            
+            if (!isLayerVisible)
+            {
+                SelectionPane.IsEnabled = false;
+
+                BtnMove.IsEnabled = false;
+                iconMove.Foreground = Brushes.Gray;
+
+                BtnText.IsEnabled = false;
+                iconText.Foreground = Brushes.Gray;
+
+                ShapesBtnGrp.Children.Clear();
+
+                int k = 0;
+
+                for (int i = 0; i < ShapesBtnGrp.RowDefinitions.Count; i++)
+                {
+                    for (int j = 0; j < ShapesBtnGrp.ColumnDefinitions.Count; j++)
+                    {
+                        if (k == _prototypes.Count)
+                        {
+                            break;
+                        }
+
+                        var item = _prototypes[k];
+
+                        var control = new RadioButton()
+                        {
+                            Width = 36,
+                            Height = 36,
+                            Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.Gray), Width = 24, Height = 24 },
+                            Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
+                            GroupName = "CtrlBtn",
+                            Tag = item
+                        };
+
+                        control.Click += ShapeBtn_Click;
+
+                        Grid.SetRow(control, i);
+                        Grid.SetColumn(control, j);
+
+                        ShapesBtnGrp.Children.Add(control);
+
+                        k++;
+                    }
+                }
+
+                ShapesBtnGrp.IsEnabled = false;
+            }
+            else
+            {
+                SelectionPane.IsEnabled = true;
+
+                BtnMove.IsEnabled = true;
+                iconMove.Foreground = Brushes.White;
+
+                ShapesBtnGrp.Children.Clear();
+
+                int k = 0;
+
+                for (int i = 0; i < ShapesBtnGrp.RowDefinitions.Count; i++)
+                {
+                    for (int j = 0; j < ShapesBtnGrp.ColumnDefinitions.Count; j++)
+                    {
+                        if (k == _prototypes.Count)
+                        {
+                            break;
+                        }
+
+                        var item = _prototypes[k];
+
+                        var control = new RadioButton()
+                        {
+                            Width = 36,
+                            Height = 36,
+                            Content = new Icon { Kind = item.Icon, Foreground = new SolidColorBrush(Colors.White), Width = 24, Height = 24 },
+                            Style = Application.Current.Resources["IconRadioButtonStyle"] as Style,
+                            GroupName = "CtrlBtn",
+                            Tag = item
+                        };
+
+                        control.Click += ShapeBtn_Click;
+
+                        Grid.SetRow(control, i);
+                        Grid.SetColumn(control, j);
+
+                        ShapesBtnGrp.Children.Add(control);
+
+                        k++;
+                    }
+                }
+
+                ShapesBtnGrp.IsEnabled = true;
             }
         }
     }
