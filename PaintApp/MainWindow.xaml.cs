@@ -1779,6 +1779,7 @@ namespace PaintApp
             }
             else
             {
+                BtnText.IsChecked = false;
                 BtnText.IsEnabled = false;
                 iconText.Foreground = Brushes.Gray;
             }
