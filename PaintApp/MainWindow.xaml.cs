@@ -90,6 +90,8 @@ namespace PaintApp
         ShapeElement _prevSelectedElement = null;
         ShapeElement _copyElement = null;
 
+        double _deleteIndex = 0;
+
         public ResizeAdorner Adorner { get; set; }
 
         public int RotateCorner = 0;
@@ -505,6 +507,8 @@ namespace PaintApp
                         });
 
                     File.WriteAllText(SaveFilePath, json);
+
+                    _isSaved = true;
                 }
             }
         }
@@ -727,12 +731,7 @@ namespace PaintApp
                 // kiểm tra xem hình sau trong list có chưa, chưa có thì thêm vào
                 string shapeNameAfter = CareTaker.GetMemento(CurrentPosition + 1).GetElementName();
 
-                if (shapeNameAfter.Equals("cut"))
-                {
-                    string elementNameAfter = CareTaker.GetRemoveElement(CurrentPosition + 1);
-                    ShapeList.Remove(ShapeList.FirstOrDefault(x => x.ElementName.Equals(elementNameAfter)));
-                }
-                else if (shapeNameAfter.Equals("del"))
+                if (shapeNameAfter.Equals("cut") || shapeNameAfter.Equals("del"))
                 {
                     string elementNameAfter = CareTaker.GetRemoveElement(CurrentPosition + 1);
                     ShapeList.Remove(ShapeList.FirstOrDefault(x => x.ElementName.Equals(elementNameAfter)));
@@ -2038,11 +2037,6 @@ namespace PaintApp
                 {
                     CareTaker.HistoryMemento.Remove(CareTaker.GetMemento(i));
                 }
-            }
-
-            if (SelectedElement == null)
-            {
-                MessageBox.Show("bruh");
             }
 
             CareTaker.AddMemento(SelectedElement.CreateMemento());
