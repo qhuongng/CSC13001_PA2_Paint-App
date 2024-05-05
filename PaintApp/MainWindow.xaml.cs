@@ -411,6 +411,10 @@ namespace PaintApp
                     OpenFile();
                 }
             }
+            else
+            {
+                OpenFile();
+            }
         }
 
         private void OpenFile()
@@ -1177,6 +1181,7 @@ namespace PaintApp
             _painter.SetFillColor((SolidColorBrush)FillClr.Background);
             _painter.SetStrokeWidth(StrokeWidth);
             _painter.SetStrokeDashArray(BitmapToDashArray(StrokeType));
+            _painter.SetShiftState(false);
 
             if (Adorner != null)
             {
@@ -1196,7 +1201,8 @@ namespace PaintApp
             _painter.SetStrokeColor(new SolidColorBrush(Colors.Red));
             _painter.SetFillColor(new SolidColorBrush(Colors.Transparent));
             _painter.SetStrokeWidth(1);
-            _painter.SetStrokeDashArray(new Double[] { 5, 2 });
+            _painter.SetStrokeDashArray([5, 2]);
+            _painter.SetShiftState(false);
 
             if (Adorner != null)
             {
