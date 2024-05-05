@@ -2035,7 +2035,12 @@ namespace PaintApp
             {
                 for (int i = CurrentPosition + 1; i < CareTaker.HistoryMemento.Count; i++)
                 {
+                    if(CareTaker.RemoveMemento.ContainsKey(i))
+                    {
+                        CareTaker.RemoveMemento.Remove(i);
+                    }
                     CareTaker.HistoryMemento.Remove(CareTaker.GetMemento(i));
+                    
                 }
             }
 
