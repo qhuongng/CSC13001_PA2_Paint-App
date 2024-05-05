@@ -391,49 +391,64 @@ namespace PaintApp
         {
             if (!_isSaved)
             {
-                MessageBoxResult result = MessageBox.Show("Do you want to save the changes you made?", "Save Changes", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("Do you want to save the changes you made?", "Save Changes", MessageBoxButton.YesNoCancel);
                 
                 if (result == MessageBoxResult.Yes)
                 {
                     SaveFile_Click(null, null);
+
+                    if (_isSaved)
+                    {
+                        OpenFile();
+                    }
                 }
-
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Title = "Open Paint";
-                openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
-
-                if (openFileDialog.ShowDialog() == true)
+                else if (result == MessageBoxResult.Cancel)
                 {
-                    try
-                    {
-                        string json = File.ReadAllText(openFileDialog.FileName);
-                        SaveFilePath = openFileDialog.FileName;
-
-                        JsonSerializerSettings settings = new JsonSerializerSettings
-                        {
-                            TypeNameHandling = TypeNameHandling.Objects
-                        };
-
-                        Dictionary<string, ObservableCollection<DataShape>> rawData = JsonConvert.DeserializeObject<Dictionary<string, ObservableCollection<DataShape>>>(json, settings);
-
-                        foreach (Layer layer in Layers)
-                        {
-                            layer.DrawingCanvas.Children.Clear();
-                            CanvasGrid.Children.Remove(layer.DrawingCanvas);
-                        }
-
-                        Layers.Clear();
-                        Layers = _saveLoadProcess.Load(rawData, this);
-                        CurrentLayer = Layers[0];
-
-                        _isSaved = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error: " + ex.Message);
-                    }
+                    return;
                 }
+                else
+                {
+                    OpenFile();
+                }
+            }
+        }
 
+        private void OpenFile()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "Open Paint";
+            openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string json = File.ReadAllText(openFileDialog.FileName);
+                    SaveFilePath = openFileDialog.FileName;
+
+                    JsonSerializerSettings settings = new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Objects
+                    };
+
+                    Dictionary<string, ObservableCollection<DataShape>> rawData = JsonConvert.DeserializeObject<Dictionary<string, ObservableCollection<DataShape>>>(json, settings);
+
+                    foreach (Layer layer in Layers)
+                    {
+                        layer.DrawingCanvas.Children.Clear();
+                        CanvasGrid.Children.Remove(layer.DrawingCanvas);
+                    }
+
+                    Layers.Clear();
+                    Layers = _saveLoadProcess.Load(rawData, this);
+                    CurrentLayer = Layers[0];
+
+                    _isSaved = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message);
+                }
             }
         }
 
