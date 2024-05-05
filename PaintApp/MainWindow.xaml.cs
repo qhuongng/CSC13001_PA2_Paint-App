@@ -148,7 +148,7 @@ namespace PaintApp
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public Dictionary<string, int> indexShape = new Dictionary<string, int>
+        public Dictionary<string, int> _indexShape = new Dictionary<string, int>
         {
             {"Rectangle", 0},{"Ellipse", 0},{"Line", 0},{"Arrow", 0},
             {"Heart", 0},{"Rounded Rectangle", 0},{"Star", 0},{"Triangle", 0}
@@ -1549,18 +1549,18 @@ namespace PaintApp
                 else
                 {
                     IShape clone = (IShape)_painter.Clone();
-                    int index = indexShape[clone.Name];
+                    int index = _indexShape[clone.Name];
 
                     if (index == 0)
                     {
                         ShapeElement newShape = new ShapeElement(_visual, clone.Name, clone.Icon);
-                        indexShape[clone.Name] = 1;
+                        _indexShape[clone.Name] = 1;
                         ShapeList.Add(newShape);
                     }
                     else
                     {
                         ShapeElement newShape = new ShapeElement(_visual, clone.Name + " " + index.ToString(), clone.Icon);
-                        indexShape[clone.Name] += 1;
+                        _indexShape[clone.Name] += 1;
                         ShapeList.Add(newShape);
                     }
 
@@ -2156,7 +2156,15 @@ namespace PaintApp
         {
             if (_copyElement != null)
             {
-                int index = indexShape[_copyElement.ElementName];
+                string shapeKey = _copyElement.ElementName;
+                int spaceIndex = _copyElement.ElementName.IndexOf(' ');
+
+                if (spaceIndex != -1)
+                {
+                    shapeKey = _copyElement.ElementName.Substring(0, spaceIndex);
+                }
+
+                int index = _indexShape[shapeKey];
 
                 MemoryStream stream = new MemoryStream();
 
@@ -2167,9 +2175,9 @@ namespace PaintApp
                 Canvas.SetTop(clonedElement, index);
                 Canvas.SetLeft(clonedElement, index);
 
-                ShapeElement newShape = new ShapeElement(clonedElement, _copyElement.ElementName + " " + index, _copyElement.ElementIcon);
+                ShapeElement newShape = new ShapeElement(clonedElement, shapeKey + " " + index, _copyElement.ElementIcon);
 
-                indexShape[_copyElement.ElementName] += 1;
+                _indexShape[shapeKey] += 1;
 
                 ShapeList.Add(newShape);
 
